@@ -9,6 +9,7 @@ import java.util.*;
  * @author This PC
  */
 public class MainController implements Runnable{
+    /*I changed here */
     /*
      //parameters for charging
      public static int numOfCells = 0; // number of cells

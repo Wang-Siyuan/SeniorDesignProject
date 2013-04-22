@@ -9,6 +9,7 @@ package my.chargingcontroller;
  * @author This PC
  */
 public class GUIController implements Runnable{
+    /*I changed here */
     private ChargingMonitor chargingMonitor = null;
     private ParameterSetup parameterSetup = null;
     private ParameterConfirm parameterConfirm = null;
