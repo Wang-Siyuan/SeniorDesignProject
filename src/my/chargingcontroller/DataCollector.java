@@ -22,7 +22,6 @@ public class DataCollector implements Runnable{
     private SerialReader sr = null;
     private Thread readerThread = null;
     private Thread[] writerThreads = null;
-    //private SerialWriter sw = null;
     private volatile Thread writerThread = null;
     
     
