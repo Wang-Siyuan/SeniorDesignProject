@@ -255,6 +255,12 @@ public class MainController extends Thread{
         }
     }
     
+    public void exitAndCleanUp()
+    {
+        this.dataCollector.turnOffAllBypass();
+        System.exit(0);
+    }
+    
     public boolean checkForCellOverheating()
     {
         boolean someCellOverHeated = false;

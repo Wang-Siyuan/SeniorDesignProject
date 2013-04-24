@@ -276,11 +276,16 @@ public class DataCollector extends Thread{
                 
                 //format what to write to the local file and write it
                 String stringToWrite = "";
-                stringToWrite += System.currentTimeMillis();
+                stringToWrite += (System.currentTimeMillis())/1000;
                 stringToWrite += "\t";
                 stringToWrite += actual_voltage;
                 stringToWrite += "\n";
-                this.writeToFile(stringToWrite);
+                
+                if(this.realTimeData.getIsCharging())
+                {
+                    System.out.println(stringToWrite);
+                    this.writeToFile(stringToWrite);
+                }
                 
                 //reset the string buffer to empty
                 this.stringBuffer = "";
@@ -619,6 +624,25 @@ public class DataCollector extends Thread{
         return false;
     }
     
+    public void turnOffAllBypass()
+    {
+        //go through all the cells and turn off bypass if they are on
+        for(int i = 1; i <= 8; i++)
+        {
+            //test the cells one by one, only proceed to acquire data if the test passed
+            if(this.testCell(i))
+            {
+                //set the bypass to off
+                this.setBypassSwitch(i, false);
+
+            }else if(i != 1)
+            {
+                this.chargingParameters.setNumOfCells(i-1);
+                break;
+            }
+        }
+    }
+    
     /*
      * This is the function that will run once the DataCollector Thread starts
      */
@@ -672,6 +696,8 @@ public class DataCollector extends Thread{
                         //errorOccurred = true;
                         //this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Current Value \n");
                     }
+                    
+                    this.turnOffAllBypass();
                     
                     //go through all possible cells
                     for(int i = 1; i <= 8; i++)

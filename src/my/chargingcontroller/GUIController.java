@@ -240,6 +240,7 @@ public class GUIController extends Thread{
         {
             this.popupDialog.dispose();
         }
+        this.mainController.exitAndCleanUp();
     }
     
     public void setRealTimeData(RealTimeData _realTimeData)
