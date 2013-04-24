@@ -117,7 +117,7 @@ public class GUIController extends Thread{
     public void userRequestedDocumentation()
     {
         String title = "Documentations";
-        String contents = "Contact Siyuan Wang.";
+        String contents = "https://github.com/MrAlwaysRight/SeniorDesignProject";
         this.createdPopupDialog(title, contents);
     }
     
