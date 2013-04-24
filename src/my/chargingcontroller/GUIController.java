@@ -8,8 +8,8 @@ package my.chargingcontroller;
  *
  * @author This PC
  */
-public class GUIController implements Runnable{
-    /*I changed here */
+public class GUIController extends Thread{
+    
     private ChargingMonitor chargingMonitor = null;
     private ParameterSetup parameterSetup = null;
     private ParameterConfirm parameterConfirm = null;
@@ -159,7 +159,7 @@ public class GUIController implements Runnable{
     
     public void newParametersSubmitted(ChargingParameters newChargingParameters)
     {
-        this.mainController.updateChargingParameters(newChargingParameters);
+        this.mainController.setChargingParameters(newChargingParameters);
         if(parameterSetup != null)
         {
             parameterSetup.dispose();
@@ -257,15 +257,12 @@ public class GUIController implements Runnable{
     {
         while(true)
         {
-            //System.out.println("GUI COntroller Thread");
             if(this.chargingMonitor != null)
             {
                 this.chargingParameters = this.mainController.getChargingParameters();
                 this.realTimeData = this.mainController.getRealTimeData();
                 this.chargingMonitor.setChargingParameters(this.chargingParameters);
                 this.chargingMonitor.setRealTimeData(this.realTimeData);
-                //System.out.println(this.mainController.getRealTimeData().getVoltage(0));
-                //System.out.println(this.chargingMonitor.getRealTimeData().getVoltage(0));
                 this.chargingMonitor.updateGUI();
             }
             try{

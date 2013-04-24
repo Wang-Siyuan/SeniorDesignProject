@@ -104,9 +104,13 @@ public class RealTimeData {
     public void setTemperature(int index, int _tCurr)
     {
         this.tCurr[index] = _tCurr;
-        if(_tCurr > maxTemp)
+        maxTemp = tCurr[0];
+        for (int i = 1; i < tCurr.length; i++)
         {
-            this.maxTemp = _tCurr;
+            if(tCurr[i] > maxTemp)
+            {
+                maxTemp = tCurr[i];
+            }
         }
     }
     

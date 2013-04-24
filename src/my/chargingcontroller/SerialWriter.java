@@ -9,7 +9,7 @@ import java.lang.*;
  *
  * @author This PC
  */
-public class SerialWriter implements Runnable{
+public class SerialWriter extends Thread{
         OutputStream out;
         boolean stop;
         
@@ -41,6 +41,19 @@ public class SerialWriter implements Runnable{
             {
                 e.printStackTrace();
             } 
+        }
+        
+        public void writeToSerialForArduino(byte data)
+        {
+            try
+            {               
+                System.out.println("I'm about to write bytes to arduino*********************************");
+                this.out.write(data);
+                System.out.println("Finished writing******************************************************");
+            }catch ( IOException e )
+            {
+                e.printStackTrace();
+            }
         }
         
         public void writeToSerial(byte[] data)

@@ -8,7 +8,7 @@ import java.io.*;
  *
  * @author This PC
  */
-public class SerialReader implements Runnable{
+public class SerialReader extends Thread{
     InputStream in;
     DataCollector dataCollector;
     boolean stop;
@@ -61,7 +61,7 @@ public class SerialReader implements Runnable{
                 String newString = "";
                 int tempLength = 0;
                 System.out.println("About to read serially");
-                    while ((( len = this.in.read(buffer)) > -1) && (!stop))
+                    while (( len = this.in.read(buffer)) > -1)
                     {
                         temp = new String(buffer,0,len);
                         if(!temp.equals(""))
@@ -99,6 +99,11 @@ public class SerialReader implements Runnable{
     public void stopThread()
     {
         this.stop = true;
+    }
+    
+    public boolean isStopped()
+    {
+        return this.stop;
     }
 
 }

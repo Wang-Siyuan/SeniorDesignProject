@@ -8,44 +8,24 @@ import java.util.*;
  *
  * @author This PC
  */
-public class MainController implements Runnable{
-    /*I changed here */
-    /*
-     //parameters for charging
-     public static int numOfCells = 0; // number of cells
-     public static double vUpper = 3.8; // voltage upper limit
-     public static int tUpper = 60; // temperature upper limit
-     public static double iUpper = 0; // current upper limit
-     public static double bypassDuration = 20; // bypass duration
-     public static double bypassThreshold = 50; // bypass threshold
-     
-     //current variable readings
-     public static double vCurr = 0; //current voltage
-     public static double iCurr = 0; //current current
-     public static int tCurr = 0; //current temperature
-     
-     //an array of booleans indicating whether or not the cell 
-     //at the specified index is bypassed or not
-     public static boolean isBypassed[]; 
-     //an array of integers indicating how long the cell
-     //at the specified index has been bypassed
-     public static int bypassTime[];
-     */
+public class MainController extends Thread{
+
     private ChargingParameters defaultChargingParameters;
     private RealTimeData defaultRealTimeData;
-    ChargingParameters chargingParameters;
-    RealTimeData realTimeData;
+    private ChargingParameters chargingParameters;
+    private RealTimeData realTimeData;
     private GUIController guiController = null;
-    
+    private DataCollector dataCollector = null;
     
     /**
-     * Creates new form ChargingControllerUI
+     * Constructor of MainController
      */
     public MainController() {
         
+        /* generate a set of default charging parameters */
         int numOfCells = 8;
         double vUpper = 4;
-        double iUpper = 20;
+        double iUpper = 500;
         int tUpper = 200;
         int bypassDuration = 20;
         int bypassThreshold = 50;
@@ -64,6 +44,7 @@ public class MainController implements Runnable{
                                                                 portToPC,
                                                                 portToArduino );
         
+        /* generate a set of default real time data */
         double[] vCurr = new double[8];
         double iCurr = 1;
         int[] tCurr = new int[8];
@@ -98,31 +79,35 @@ public class MainController implements Runnable{
                                                 errorOccurred,
                                                 errorMessage);
         
+        /* initialize the charging parameter and real time data to be the default ones */
         this.chargingParameters = this.defaultChargingParameters;
         this.realTimeData = this.defaultRealTimeData;
-        listOfPorts = new ArrayList<String>();
-        DataCollector dataCollector = new DataCollector(this, realTimeData, chargingParameters);
         
+        /* instantiate the data collector and the GUI controller */
+        this.dataCollector = new DataCollector(this, realTimeData, chargingParameters);
+        this.guiController = new GUIController(this, chargingParameters, realTimeData);
         
-        guiController = new GUIController(this, chargingParameters, realTimeData);
+        /* create the charging monitor page */
         guiController.createChargingMonitorPage();
-        new Thread(guiController).start();
-        new Thread(dataCollector).start();
+        
+        /* start the GUI controller thread and also the data collector thread */
+        guiController.start();
+        dataCollector.start();
     }                                        
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        /* simply instantiate an object of the MainController class and start the thread */
         MainController mainController = new MainController();
-        new Thread(mainController).start();
-    }   
-    
-    public void updateChargingParameters(ChargingParameters newChargingParameters)
-    {
-        this.chargingParameters = newChargingParameters;
+        mainController.start();
     }
-
+    
+    /* 
+     * The following two functions respond to user request that
+     * involves the charging algorithm
+     */
     public void userApprovedParameters()
     {
         this.realTimeData.setIsCharging(true);
@@ -133,6 +118,10 @@ public class MainController implements Runnable{
         this.realTimeData.setIsCharging(false);
     }
     
+    /*
+     * The following four functions are getters and setters for the RealTimeData
+     * And the Charging Parameters
+     */
     public RealTimeData getRealTimeData()
     {
         return this.realTimeData;
@@ -159,8 +148,13 @@ public class MainController implements Runnable{
     
     public void run()
     {   
+        /* MainController thread will keep running until the program exits */
         while(true)
         {
+            /**
+             * At any point, if an error occurred, set the state to be IDLE
+             * and show the user about the warning message
+             */
             if(this.realTimeData.getErrorOccurred() == true)
             {
                 this.realTimeData.setIsCharging(false);
@@ -171,9 +165,18 @@ public class MainController implements Runnable{
                 continue;
             }
             
-            //System.out.println("Controller Thread:"+this.realTimeData.getVoltage(0));
+            /**
+             * stay in this while loop if the user wants to charge and hasn't decide
+             * to stop yet
+             */
             while(this.realTimeData.getIsCharging())
             {
+                
+                /**
+                 * If the system state is currently idle, only change the
+                 * system state to charging only if the voltage, temperature,
+                 * and current is not over the limit
+                 */
                 if(this.realTimeData.getState().equals(RealTimeData.State.IDLE))
                 {
                     if(this.checkForCellOvercharge())
@@ -190,23 +193,33 @@ public class MainController implements Runnable{
                     }else
                     {
                         this.realTimeData.setState(RealTimeData.State.CHARGING);
+                        this.dataCollector.setChargingRelay(true);
                     }
                 }
-
+                
+                /**
+                 * If the current state is already charging state
+                 */
                 if(this.realTimeData.getState().equals(RealTimeData.State.CHARGING))
                 {
                     if(this.checkForCellOvercharge())
                     {
-                       //tell the user at least one of the cells is overcharged
+                        //tell the user at least one of the cells is overcharged
                         //charging was finished
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
-                        this.guiController.createdPopupDialog("Warning", "Charging is Done!");
+                        this.dataCollector.setChargingRelay(false);
+                        this.guiController.createdPopupDialog("Message", "Charging is Done!");
+                        for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
+                        {
+                            this.dataCollector.setBypassSwitch(j, false);
+                        }
 
                     }else if(this.checkForCellOverheating())
                     {
                         //tell the user at least one of the cells is overheating
                         //charging was stopped
+                        this.dataCollector.setChargingRelay(false);
                         this.guiController.createdPopupDialog("Warning", "Charging is stopped because at least one of the cells is overheating.");
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
@@ -214,6 +227,7 @@ public class MainController implements Runnable{
                     {
                         //tell the user the current is over the limit
                         //charging was stopped
+                        this.dataCollector.setChargingRelay(false);
                         this.guiController.createdPopupDialog("Warning", "Charging is stopped because the current is already over the upper limit.");
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
@@ -223,12 +237,14 @@ public class MainController implements Runnable{
                         {
                             if(this.checkForBypass(i))
                             {
-                                this.realTimeData.setBypassInfo(i, true);
+                                this.dataCollector.setBypassSwitch(i+1, true);
                             }
                         }
                     }
                 }
             }
+            
+            this.dataCollector.setChargingRelay(false);
             this.realTimeData.setState(RealTimeData.State.IDLE);
             try{
                 Thread.sleep(100);

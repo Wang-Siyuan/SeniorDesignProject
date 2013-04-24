@@ -12,75 +12,113 @@ import java.lang.*;
  *
  * @author This PC
  */
-public class DataCollector implements Runnable{
+public class DataCollector extends Thread{
     
+    private static final String BMS_CONFIRM = "0042";
+    private static final String ARDUINO_CONFIRM_ONE = "Ardui";
+    private static final String ARDUINO_CONFIRM_TWO = "Ardu";
+    private static final byte ARDUINO_COMMAND_ON = 'a';
+    private static final byte ARDUINO_COMMAND_OFF = 'b';
+    private static final int SLEEP_TIME_FOR_READER = 1000;
+    private static final int SLEEP_TIME_BTW_EACH_DATA_ACQUISITION = 1000;
+    private static final String BMS_INVALID_MSG = "FFFF";
+    private static final String BYPASS_ON = "0001";
+    private static final String BYPASS_OFF = "0000";
+    private static final String BMS_VALID_TEST = "0042";
+    // The MainController is the DataCollecotor's parent in the control hierarchy
     private MainController mainController = null;
+    
+    /**
+     * DataCollector keeps a local copy of the RealTimeData and ChargingParameters,
+     * but the MainController keeps the real copy
+     */
     private RealTimeData realTimeData = null;
     private ChargingParameters chargingParameters = null;
-    private byte[] boardAddresses = null;
+    
+    /**
+     * A SerialWriter object for each port, since writing to a invalid port may
+     * potentially block
+     */
     private SerialWriter[] sw = null;
+    
+    //only one SerialReader is needed since it will never block
     private SerialReader sr = null;
-    private Thread readerThread = null;
-    private Thread[] writerThreads = null;
-    private volatile Thread writerThread = null;
     
-    
+    /* 
+     * This is the buffer that the SerialReader will update when it receive new
+     * bytes serially
+     */
     private String stringBuffer = null;
+    
+    //The following two strings holds the Port names in String format
     private String portnameToBMS = null;
     private String portnameToArduino = null;
+    
+    //The following two strings holds the Port names in SerialPort format
     private SerialPort portToBMS = null;
     private SerialPort portToArduino = null;
     
+    //The following indices indicate which element in the SerialWriter array 
+    //corresponds to BMS/Arduino
     private int writerIndexForBMS = 0;
     private int writerIndexForArduino = 0;
     
     public DataCollector(MainController _mainController, RealTimeData _realTimeData, ChargingParameters _chargingParameters)
     {
+        //assign data from parameters passed in
         this.mainController = _mainController;
         this.chargingParameters = _chargingParameters;
         this.realTimeData = _realTimeData;
+        
+        /**
+         * first do a search on the ports, this will update the "listOfPorts" field
+         * in the chargingParameters
+         */
         this.lookForPorts();
-        //this.mainController.setChargingParameters(this.chargingParameters);
-        this.boardAddresses = new byte[8];
         
+        //initialize the SerialReader
         this.sr = new SerialReader();
-        readerThread = new Thread(this.sr);
-        readerThread.start();
+        this.sr.start();
         
-        
-        this.sw = new SerialWriter[8];
-        writerThreads = new Thread[8];
-        
-        //this.sw = new SerialWriter();
-        //this.writerThread = new Thread(this.sw);
-        
-
-        for(int i = 0; i < 8; i++)
+        //initialize the SerialWriters
+        this.sw = new SerialWriter[8];        
+        for(int i = 0; i < this.chargingParameters.getListOfPorts().size(); i++)
         {
-            this.boardAddresses[i] = (byte)(i);
             sw[i] = new SerialWriter();
-            writerThreads[i] = new Thread(sw[i]);
         }
+        
+        //initialize the string buffer for the SerialReader
         stringBuffer = "";
     }
     
+    /**
+     * This is the function by the SerialReader to inform the DataCollector the
+     * latest data read from the serial port that corresponds to the BMS boards
+     * @param _stringBuffer 
+     */
     public void updateStringBuffer(String _stringBuffer)
     {
         this.stringBuffer = _stringBuffer;
     }
     
+    /**
+     * This function will identify which port corresponds to Arduino and which
+     * port corresponds to the BMS boards
+     * 
+     * @return true both ports are identified, false otherwise
+     * @throws Exception 
+     */
     public boolean getPortNames() throws Exception
     {
         SerialPort serialPort = null;
         boolean BMSfound = false;
         boolean ArduinoFound = false;
         
-        //for (int i = 0; i < this.chargingParameters.getListOfPorts().size(); i++)
+        //Going through all the ports discovered before
+        //You can view all available ports under device manager in a windows machine
         for (int i = (this.chargingParameters.getListOfPorts().size()-1); i >=0; i--)
-        {
-            //System.out.println("---------Current port is: "+i+"/"+(this.chargingParameters.getListOfPorts().size()-1)+"-----");
-            //System.out.println("try one port:" + this.chargingParameters.getListOfPorts().get(i));
-            
+        {   
+            //try connecting to one of the serial port
             try{
                 serialPort = this.connect(this.chargingParameters.getListOfPorts().get(i));
             }catch(PortInUseException e)
@@ -88,48 +126,52 @@ public class DataCollector implements Runnable{
                 continue;
             }
             
+            //set the input and output stream for the SerialReader and SerialWriter
             InputStream in = serialPort.getInputStream();
             OutputStream out = serialPort.getOutputStream();
-            
-            
+
             this.sr.setInputStream(in);
             this.sr.setDataCollector(this);
-            this.sr.startThread();
-                      
+            if(this.sr.isStopped())
+            {
+                this.sr.startThread();
+            }          
             this.sw[i].setOutputStream(out);
-            if(!this.writerThreads[i].isAlive())
-            {
-                this.writerThreads[i].start();
-            }
-            Thread.sleep(1000);
-
-            this.sw[i] = new SerialWriter();
-            this.writerThreads[i] = new Thread(this.sw[i]);
             
-            if(this.stringBuffer.equals("0042"))
+            if(!this.sw[i].isAlive())
             {
-                System.out.println("BMS board found");
-                //System.out.println(this.chargingParameters.getListOfPorts().get(i));
+                this.sw[i].start();
+            }
+            
+            //wait until the SerialReader thread updates the buffer
+            Thread.sleep(1000);
+            
+            if(this.stringBuffer.equals(BMS_CONFIRM))
+            {
+                /**
+                 * update all the field in the DataCollector class that is related
+                 * to the BMS board
+                 */
                 this.portnameToBMS = this.chargingParameters.getListOfPorts().get(i);
                 this.portToBMS = serialPort;
                 this.writerIndexForBMS = i;
                 BMSfound = true;
-            }else if(this.stringBuffer.equals("Ardui")||this.stringBuffer.equals("Ardu"))
-           // }else if(this.stringBuffer.charAt(0) == 'A')
+            }else if(this.stringBuffer.equals(ARDUINO_CONFIRM_ONE)||this.stringBuffer.equals(ARDUINO_CONFIRM_TWO))
             {
-                System.out.println("Arduino Board found");
-                //System.out.println(this.chargingParameters.getListOfPorts().get(i));
+                /**
+                 * update all the field in the DataCollector class that is related
+                 * to the Arduino board
+                 */
                 this.portToArduino = serialPort;
                 this.portnameToArduino = this.chargingParameters.getListOfPorts().get(i);
                 this.writerIndexForArduino = i;
+                this.sw[this.writerIndexForArduino].writeToSerialForArduino(ARDUINO_COMMAND_OFF);
                 ArduinoFound = true;
             }else
             {
-                System.out.println("Incorrect port");
-                Thread.sleep(1000);
                 if(!this.stringBuffer.equals(""))
                 {
-                    System.out.println("haha"+this.stringBuffer+"haha");
+                    System.out.println("Have something in the string buffer, but it isn't the correct respond message");
                 }
                 
                 /*  Dear future engineers, if you could make the following calls
@@ -141,7 +183,8 @@ public class DataCollector implements Runnable{
                 //this.portToBMS.close();
             }
             this.stringBuffer = "";
-            this.sr.stopThread();
+            
+            /* The program will only proceed if both ports are found */
             if(BMSfound && ArduinoFound)
             {
                 return true;
@@ -150,162 +193,196 @@ public class DataCollector implements Runnable{
         return false;
     }
     
+    /**
+     * This is the function to write a string content to a local file
+     * @param content 
+     */
     public void writeToFile(String content)
     {
-//        try {
-//                File file = new File("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt");
-//
-//                if (!file.exists()) {
-//                        file.createNewFile();
-//                }
-//                
-                try {
-                    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
-                    out.println(content);
-                    out.close();
-                } catch (IOException e) {
-                    //oh noes!
-                }
-
-                //file.setReadOnly();
-                
-//        } catch (IOException e) {
-//                e.printStackTrace();
-//        }
+        try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+            out.println(content);
+            out.close();
+        } catch (IOException e) {
+            //error handling
+        }
     }
     
+    /**
+     * This function is to serve the I2C communication.  It update the available
+     * bytes to write based on the cell index.  
+     * 
+     * @param bytesToWrite
+     * @param index This should range from 1-8(inclusive on both sides)
+     * @return 
+     */
+    public byte[] updateBytesBasedOnIndex(byte[] bytesToWrite, int index)
+    {
+       if(index <= 4)
+        {
+            bytesToWrite[1] += 2*index;
+        }else if(index < 8){
+            bytesToWrite[1] = 'A';
+            bytesToWrite[1] += (byte)(2*(index-5));
+        }else if(index == 8)
+        {
+            bytesToWrite[0] += 1;
+        }else{
+            return null;
+        } 
+       return bytesToWrite;
+    }
+    
+    /**
+     * This function will retrieve the voltage of the cell that has the index
+     * passed in
+     * @param index range from 1 to 8(inclusive)
+     * @return real voltage value in double
+     */
     public double getCellVoltage(int index)
     {
+        //parameters in the conversion equation
         double v_ref = 2.048;
         int v_v = 0;
         double actual_voltage = 0;
-        byte[] temp = {'0','0','1','0','R','0','2'};
-        if(index <= 4)
-        {
-            temp[1] += 2*index;
-        }else{
-            temp[1] = 'A';
-            temp[1] += (byte)(2*(index-5));
-        }
         
-        System.out.println("The offset this time is:" + temp[1]);
+        /**
+         * The basic command(without the index offset) that is used for
+         * retrieving the voltage value
+         */
+        byte[] bytesToWrite = {'0','0','1','0','R','0','2'};
+        
+        /**
+         * get the actual bytes to write with the adjustment based on the index
+         * value
+         */
+        bytesToWrite = this.updateBytesBasedOnIndex(bytesToWrite, index);
+        
         try{
             
-            System.out.println("About to read for testing cell");
-            this.sr.startThread();
-
+            //write the bytes to the BMS board
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             
-            this.sw[this.writerIndexForBMS].writeToSerial(temp);
-            Thread.sleep(1000);
-            if(!this.stringBuffer.equals("FFFF"))
+            //give the Serial Reader a little time before reading it
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            
+            if(!this.stringBuffer.equals(BMS_INVALID_MSG))
             {
-                System.out.println("I got a valid reading!");
+                //conversion equations
                 v_v = Integer.parseInt(this.stringBuffer, 16);
                 actual_voltage = 4.096 - v_ref*(v_v/(Math.pow(2,10) - 1));
                 int temp_result = (int)(actual_voltage*100);
                 actual_voltage = ((double)(temp_result))/100;
                 
+                //format what to write to the local file and write it
                 String stringToWrite = "";
                 stringToWrite += System.currentTimeMillis();
                 stringToWrite += "\t";
                 stringToWrite += actual_voltage;
                 stringToWrite += "\n";
-                
                 this.writeToFile(stringToWrite);
                 
+                //reset the string buffer to empty
+                this.stringBuffer = "";
                 return actual_voltage;
-            }else{
-               System.out.println("Couldn't get any reading");
             }
-        
         }catch(Exception e)
         {
-            
+           //error handling 
         }
         return 0;
     }
     
     public int getCellTemp(int index)
     {
+        //parameters in the conversion equation
         double v_ref = 2.048;
         int v_t = 0;
         int actual_temperature = 0;
-        byte[] temp = {'0','0','1','1','R','0','2'};
-        if(index <= 4)
-        {
-            temp[1] += 2*index;
-        }else{
-            temp[1] = 'A';
-            temp[1] += (byte)(2*(index-5));
-        }
         
-        System.out.println("The offset this time is:" + temp[1]);
+        /**
+         * The basic command(without the index offset) that is used for
+         * retrieving the temperature value
+         */
+        byte[] bytesToWrite = {'0','0','1','1','R','0','2'};
+        
+        /**
+         * get the actual bytes to write with the adjustment based on the index
+         * value
+         */
+        this.updateBytesBasedOnIndex(bytesToWrite, index);
+        
         try{
             
-            System.out.println("About to read for testing cell");
-            this.sr.startThread();
-
-            
-            this.sw[this.writerIndexForBMS].writeToSerial(temp);
-            Thread.sleep(100);
-            if(!this.stringBuffer.equals("FFFF"))
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            if(!this.stringBuffer.equals(BMS_INVALID_MSG))
             {
-                System.out.println("I got a valid reading!");
+                //conversion equations
                 v_t = Integer.parseInt(this.stringBuffer, 16);
                 actual_temperature = (int)((v_ref*(v_t/(Math.pow(2,10) - 1)) - 0.5)/0.01);
+                
+                //reset the buffer
+                this.stringBuffer = "";
+                
                 return actual_temperature;
-            }else{
-               System.out.println("Couldn't get any reading");
             }
         
         }catch(Exception e)
         {
-            
+            //error handling
         }
         return 0;
     }
     
     public double getPackCurrent()
     {
+        //The parameters used for conversion equation
         double v_ref = 2.048;
         double gain = 305;
         double v_off = -0.0022;
-//        double resistance_bar = 1;
         double resistance_bar = 0.000021;
-
+        
+        //initialize some local variables
         int v_ic = 0;
         double actual_current = 0;
+        
+        //The command used to get current in I2C
         byte[] temp = {'0','2','1','2','R','0','2'};
         
         try{
             
-            System.out.println("About to read for testing cell");
-            this.sr.startThread();
-
-            
+            //write the command to the BMS board
             this.sw[this.writerIndexForBMS].writeToSerial(temp);
-            Thread.sleep(100);
-            if(!this.stringBuffer.equals("FFFF"))
+            
+            //wait for the SerialReader to update the buffer
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            
+            
+            if(!this.stringBuffer.equals(BMS_INVALID_MSG))
             {
-                System.out.println("I got a valid reading!");
+                //conversion equation
                 v_ic = Integer.parseInt(this.stringBuffer, 16);
                 actual_current = ((v_ref/gain)*(v_ic/(Math.pow(2,10) - 1)) + v_off)/resistance_bar;
                 int temp_result = (int)(actual_current*100);
                 actual_current = ((double)(temp_result))/100;
+                
+                //reset the buffer
+                this.stringBuffer = "";
+                
                 return actual_current;
-            }else{
-               System.out.println("Couldn't get any reading");
             }
         
         }catch(Exception e)
         {
-            
+            //error handling
         }
         return 0;
     }
     
     public long getBypassTime(int index)
     {
+        //local variables to store values
         String min = "";
         String sec = "";
         String millisec = "";
@@ -314,266 +391,305 @@ public class DataCollector implements Runnable{
         long time_millisec = 0;
         long timeToReturn = 0;
         
-        byte[] temp = {'0','0','1','E','R','0','6'};
-        if(index <= 4)
-        {
-            temp[1] += 2*index;
-        }else{
-            temp[1] = 'A';
-            temp[1] += (byte)(2*(index-5));
-        }
+        //command to get bypass time
+        byte[] bytesToWrite = {'0','0','1','E','R','0','6'};
         
-        System.out.println("The offset this time is:" + temp[1]);
+        //update the bytes to write based on the cell index
+        this.updateBytesBasedOnIndex(bytesToWrite, index);
+        
         try{
-            this.sr.readThreshold = 11;
-            this.sr.startThread();
             
-            this.sw[this.writerIndexForBMS].writeToSerial(temp);
-            Thread.sleep(1000);
-            if(!this.stringBuffer.equals("FFFF"))
+            //reset the read threshold since 6 bytes will be returned
+            this.sr.readThreshold = 11;
+            
+            //write the bytes to the BMS board
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
+            
+            //wait for the Serial Reader to update the string buffer
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            
+            if(!this.stringBuffer.equals(BMS_INVALID_MSG))
             {
+                //parse min, sec, millisec in different segments of the 6 bytes returned
                 min = this.stringBuffer.substring(0, 4);
-                System.out.println("I got a valid reading: " + this.stringBuffer);
-                System.out.println("This is the minutes: " + min);
                 time_min = Long.parseLong(min, 16);
-                System.out.println("This is the minutes in integer:" + time_min);
+
                 sec = this.stringBuffer.substring(4, 8);
-                System.out.println("This is the sec: " + sec);
-                time_sec = Long.parseLong(min, 16);
-                System.out.println("This is the secs in integer:" + time_sec);
+                time_sec = Long.parseLong(sec, 16);
+
                 millisec = this.stringBuffer.substring(8, 12);
-                System.out.println("This is the sec: " + millisec);
-                time_millisec = Long.parseLong(min, 16);
-                System.out.println("This is the millisecs in integer:" + time_millisec);
+                time_millisec = Long.parseLong(millisec, 16);
+
                 timeToReturn = (time_min << 32) + (time_sec << 16) + time_millisec;
+                
+                //reset the SerialReader's threshold so that it can process other strings returned
                 this.sr.readThreshold = 4;
-                System.out.println(timeToReturn);
+                
+                //reset the string buffer
+                this.stringBuffer = "";
                 return timeToReturn;
-            }else{
-               System.out.println("Couldn't get any reading");
             }
-        
         }catch(Exception e)
         {
-            
+            //error handling
         }
         return 0;
     }
     
-    public void setBypassSwitch(boolean isOn)
+    public void setBypassSwitch(int index, boolean isOn)
     {
-        //need to talk to BMS
-    }
-    
-    public int getBypassState(int index)
-    {
-        byte[] temp = {'0','0','1','4','R','0','2'};
-        if(index <= 4)
+        //The command used to set bypass switch
+        byte[] bytesToWrite = {'0','0','0','0','0','0','0','1'};
+        
+        /**
+         * the boolean in the parameter determines whether or not the last bit
+         * should be 1 or 0
+         */
+        if(!isOn)
         {
-            temp[1] += 2*index;
-        }else{
-            temp[1] = 'A';
-            temp[1] += (byte)(2*(index-5));
+            bytesToWrite[7] = '0';
         }
         
-        System.out.println("The offset this time is:" + temp[1]);
-        try{
-            
-            this.sr.startThread();
-
-            
-            this.sw[this.writerIndexForBMS].writeToSerial(temp);
-            Thread.sleep(10);
-            if(!this.stringBuffer.equals("FFFF"))
-            {
-                if(this.stringBuffer.equals("0000"))
-                {
-                    System.out.println("Bypass off");
-                    return 0;
-                }else if(this.stringBuffer.equals("0001"))
-                {
-                    System.out.println("Bypass on");
-                    return 1;
-                }else
-                {
-                    System.out.println("Read some garbage");
-                    return -1;
-                }
-            }else{
-               System.out.println("Couldn't get any reading");
-            }
+        //update the bytes to write based on the index value
+        this.updateBytesBasedOnIndex(bytesToWrite, index);
         
+        //writing the bytes to BMS board to set the bypass switch
+        try{
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
         }catch(Exception e)
         {
             
         }
-        return -1;
     }
     
-    public void setBoardAddress()
+    public int getBypassState(int index)
     {
-        //need instruction
+        //command used to get bypass state
+        byte[] bytesToWrite = {'0','0','1','4','R','0','2'};
+        
+        //update the bytes based on the cell index
+        this.updateBytesBasedOnIndex(bytesToWrite, index);
+        
+        try{
+            //write the bytes to BMS board
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
+            
+            //allow the SerialReader to update the string buffer
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            
+            if(!this.stringBuffer.equals(BMS_INVALID_MSG))
+            {
+                if(this.stringBuffer.equals(BYPASS_OFF))
+                {
+                    return 0;
+                }else if(this.stringBuffer.equals(BYPASS_ON))
+                {
+                    return 1;
+                }else
+                {
+                    return -1;
+                }
+            }
+        
+        }catch(Exception e)
+        {
+            //error handling
+        }
+        return -1;
     }
     
     SerialPort connect ( String portName ) throws Exception
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
+        
+        //handle the error if the port is already owned
         if ( portIdentifier.isCurrentlyOwned() )
         {
             System.out.println("Error: Port is currently in use");
+            //error handling
         }
         else
         {
             CommPort commPort = portIdentifier.open(this.getClass().getName(),2000);
             
+            /**
+             * only use serial port and set the corresponding parameters as 
+             * specified in the I2C protocol
+             */
             if ( commPort instanceof SerialPort )
             {
                 SerialPort serialPort = (SerialPort) commPort;
                 serialPort.setSerialPortParams(57600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
                 serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_OUT);
-                
-                //InputStream in = serialPort.getInputStream();
-                //OutputStream out = serialPort.getOutputStream();
+
                 return serialPort;
             }
-            else
-            {
-                System.out.println("Error: Only serial ports are handled by this example.");
-                return null;
-            }
+            
         }
         return null;
     }
     
     public void lookForPorts() {
-        ArrayList<String> listOfPorts = this.chargingParameters.getListOfPorts();
-        if(listOfPorts == null)
-        {
-            return;
-        }
+        ArrayList<String> listOfPorts = new ArrayList<String>();
         
-        if(!listOfPorts.isEmpty())
-        {
-            listOfPorts.clear();
-        } 
-        System.out.println("Starting to search for ports.  Available ports are:");
+        //get the identifiers of all the ports
         Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
+        
+        //go through all the port identifiers
         while (thePorts.hasMoreElements()) {
             CommPortIdentifier com = (CommPortIdentifier) thePorts.nextElement();
             switch (com.getPortType()) {
-            case CommPortIdentifier.PORT_SERIAL:
-                try {
-                    CommPort thePort = com.open("CommUtil", 50);
-                    thePort.close();
-                    if(!listOfPorts.contains(com.getName()))
-                    {
-                        listOfPorts.add(com.getName());
+                
+                //only check the serial ports
+                case CommPortIdentifier.PORT_SERIAL:
+                    try {
+                        CommPort thePort = com.open("CommUtil", 50);
+                        thePort.close();
+                        if(!listOfPorts.contains(com.getName()))
+                        {
+                            listOfPorts.add(com.getName());
+                        }
+                        System.out.print(com.getName()+"\r\n");
+                    } catch (PortInUseException e) {
+                        System.out.println("Port"+ com.getName() + "already used found when looking for ports");
+                    } catch (Exception e) {
+                        System.err.println("Failed to open port " + com.getName());
+                        e.printStackTrace();
                     }
-                    System.out.print(com.getName()+"\r\n");
-                } catch (PortInUseException e) {
-                    //System.out.println("Port, "  + com.getName() +  ", is in use.");
-                    System.out.println("Port"+ com.getName() + "already used found when looking for ports");
-                } catch (Exception e) {
-                    System.err.println("Failed to open port " + com.getName());
-                    e.printStackTrace();
-                }
             }
         }
         
+        //set the listOfPorts field in the charging parameters
         this.chargingParameters.setListOfPorts(listOfPorts);
+    }
+    
+    /**
+     * Write 'a' or 'b' to the Arduino serial port to set the Charging Relay on
+     * or off
+     * @param isOn true if the relay needs to be on
+     */
+    public void setChargingRelay(boolean isOn)
+    {
+        
+        byte byteToTurnOn = 'a';
+        byte byteToTurnOff = 'b';
+        try{           
+            if(isOn)
+            {
+                this.sw[this.writerIndexForArduino].writeToSerialForArduino(byteToTurnOn);
+            }else
+            {
+                this.sw[this.writerIndexForArduino].writeToSerialForArduino(byteToTurnOff);
+            }
+        }catch(Exception e)
+        {
+            
+        }
     }
     
     
     public boolean testCell(int index)
     {       
-        byte[] temp = {'0','0','1','7','R','0','2'};
-        if(index <= 4)
-        {
-            temp[1] += 2*index;
-        }else{
-            temp[1] = 'A';
-            temp[1] += (byte)(2*(index-5));
-        }
+        //the command to verify if the cell is there
+        byte[] bytesToWrite = {'0','0','1','7','R','0','2'};
         
-        System.out.println("The offset this time is:" + temp[1]);
+        //update the bytes to write based on the index
+        this.updateBytesBasedOnIndex(bytesToWrite, index);
+        
         try{
             
-            System.out.println("About to read for testing cell");
-            this.sr.startThread();
-
+            //write the BMS board with the test command
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             
-            this.sw[this.writerIndexForBMS].writeToSerial(temp);
-            Thread.sleep(1000);
-            if(this.stringBuffer.equals("0042"))
+            //allow the Serial Reader to write to the string buffer
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            
+            //check if the string buffer holds the correct string returned by BMS
+            if(this.stringBuffer.equals(BMS_VALID_TEST))
             {
-                System.out.println("test passed!");
                 return true;
             }else{
+                //error handling
                 System.out.println("This is what I got: " + this.stringBuffer);
             }
-        
         }catch(Exception e)
         {
-            
+            //error handling
         }
         return false;
     }
     
+    /*
+     * This is the function that will run once the DataCollector Thread starts
+     */
     public void run()
     {
+        //initialize a series of local variables
         boolean errorOccurred;
-        String tempPortName = "";
         double currentReading = 0;
         double voltageReading = 0;
         int tempReading = 0;
         int bypassState = -1;
-        this.lookForPorts();
+
         try{
+            
+            //only proceed if both ports are found
             if(getPortNames())
             {
+                
+                //make sure the Serial Reader and Serial Writer has the correct
+                //input and output stream
                 InputStream in = this.portToBMS.getInputStream();
                 OutputStream out = this.portToBMS.getOutputStream();
 
                 this.sr.setInputStream(in);
                 this.sr.setDataCollector(this);
                 this.sw[this.writerIndexForBMS].setOutputStream(out);
+                
+                //This will continuously run until the program exits
                 while(true)
                 {
+                    //always work off the RealTimeData and ChargingParameters that the MainController has
                     this.realTimeData = this.mainController.getRealTimeData();
                     this.chargingParameters = this.mainController.getChargingParameters();
                     this.chargingParameters.setPortToArduino(portnameToArduino);
                     this.chargingParameters.setPortToBMS(portnameToBMS);
+                    
+                    //reset the Error Message fields
                     this.realTimeData.setErrorMessage("");
                     this.realTimeData.setErrorOccurred(false);
                     
-                    System.out.println("I'm here!");
                     errorOccurred = false;
+                    
+                    //read the current
                     currentReading = this.getPackCurrent();
+                    
                     if( currentReading != 0 )
                     {
                         this.realTimeData.setCurrent(currentReading);
-                        System.out.println(currentReading);
                     }else{
+                        //some specifial error handling
                         //errorOccurred = true;
                         //this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Current Value \n");
                     }
-
+                    
+                    //go through all possible cells
                     for(int i = 1; i <= 8; i++)
                     {
-                        System.out.println("About to test cell "+i);
+                        //test the cells one by one, only proceed to acquire data if the test passed
                         if(this.testCell(i))
                         {
-                            System.out.println("Cell "+i +" passed!");
+                            //get the cell voltage
                             voltageReading = this.getCellVoltage(i);
                             if(  voltageReading != 0 )
                             {
                                 this.realTimeData.setVoltage(i-1, voltageReading);
-                                System.out.println(voltageReading);
                             }else{
                                 errorOccurred = true;
                                 this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Voltage Value \n");
                             }
                             
+                            //get the cell temperature
                             tempReading = this.getCellTemp(i);
                             if(  tempReading != 0 )
                             {
@@ -584,10 +700,14 @@ public class DataCollector implements Runnable{
                                 this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Temperature Value \n");
                             }
                             
+                            //get the bypass state
                             bypassState = this.getBypassState(i);
+                            
                             if( bypassState == 1)
                             {
                                 this.realTimeData.setBypassInfo(i-1, true);
+                                
+                                //also retrieve the bypass time if it is bypassed
                                 this.realTimeData.setBypassTime(i-1, this.getBypassTime(i));
                             }else if(bypassState == 0)
                             {
@@ -600,31 +720,34 @@ public class DataCollector implements Runnable{
                             
                         }else if(i != 1)
                         {
+                            //update the number of cells
                             this.chargingParameters.setNumOfCells(i-1);
-                            System.out.println("The number of cells is: "+this.chargingParameters.getNumOfCells());
                             break;
                         }else
                         {
+                            //error handling for no cells
                             this.realTimeData.setErrorOccurred(true);
-                            this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"Cell"+i+"is not responding\r\n");
+                            this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"No Cell Detected.  Please check if one of the cells have address 0x02\n");
                             errorOccurred = true;
                         }
                     }
                     
+                    //set the errorOccurred field to be true if error did occur
                     if(!errorOccurred)
                     {
                         this.realTimeData.setErrorOccurred(false);
                     }
                     
+                    //update the MainController's RealTimeData and ChargingParameters
                     this.mainController.setRealTimeData(this.realTimeData);
                     this.mainController.setChargingParameters(this.chargingParameters);
                     
-//                    try{
-//                        Thread.sleep(100);
-//                    }catch(Exception e)
-//                    {
-//
-//                    }
+                    try{
+                        Thread.sleep(SLEEP_TIME_BTW_EACH_DATA_ACQUISITION);
+                    }catch(Exception e)
+                    {
+                        //error handling
+                    }
                 }
             }else
             {
@@ -634,7 +757,6 @@ public class DataCollector implements Runnable{
         {
             //error handling
         }
-        
     }
     
 

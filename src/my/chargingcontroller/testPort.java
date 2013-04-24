@@ -120,7 +120,7 @@ public class testPort
                     {
                         //this.out.write(0xFE);
                         c = 0xFFFF;
-                        this.out.write('c');
+                        this.out.write('d');
 
                         this.out.write('G');
                         this.out.write('3');
@@ -150,7 +150,7 @@ public class testPort
                         this.out.write('a');
                     }else if(c == 52)
                     {
-                        this.out.write('c');
+                        this.out.write('b');
                     }else
                     {
                         //this.out.write(c);
@@ -202,7 +202,7 @@ public class testPort
             {
                 //System.out.println("Port Founded:");
             }
-            myTestPort.connect("COM17");
+            myTestPort.connect("COM21");
         }
         catch ( Exception e )
         {
