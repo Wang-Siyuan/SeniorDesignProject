@@ -9,7 +9,7 @@ import java.util.*;
  * @author Siyuan Wang
  */
 public class ChargingParameters {
-    //parameters set by the user
+    
     private int numOfCells = 0;
     private double vUpper = 0;
     private double iUpper = 0;
@@ -21,6 +21,19 @@ public class ChargingParameters {
     private String portToBMS = null;
     private String portToArduino = null;
     
+    /**
+     * Default Constructor
+     * @param _numOfCells
+     * @param _vUpper
+     * @param _iUpper
+     * @param _tUpper
+     * @param _bypassDuration
+     * @param _bypassThreshold
+     * @param _bypassCutoff
+     * @param _listOfPorts
+     * @param _portToBMS
+     * @param _portToArduino 
+     */
     public ChargingParameters(  int _numOfCells, double _vUpper, double _iUpper, 
                                 int _tUpper, int _bypassDuration,
                                 int _bypassThreshold, double _bypassCutoff, 
@@ -39,12 +52,27 @@ public class ChargingParameters {
         this.portToBMS = _portToBMS;
     }
     
+    /**
+     * Alternative Constructor
+     */
     public ChargingParameters()
     {
         
     }
     
-    /* the setter function to set all the parameters */
+    /**
+     * setter function to set all the values wrapped by this class
+     * @param _numOfCells
+     * @param _vUpper
+     * @param _iUpper
+     * @param _tUpper
+     * @param _bypassDuration
+     * @param _bypassCutoff
+     * @param _bypassThreshold
+     * @param _listOfPorts
+     * @param _portToBMS
+     * @param _portToArduino 
+     */
     public void setParameters(  int _numOfCells, double _vUpper, double _iUpper, 
                                 int _tUpper, int _bypassDuration, double _bypassCutoff,
                                 int _bypassThreshold, ArrayList<String> _listOfPorts,
@@ -62,12 +90,13 @@ public class ChargingParameters {
         this.portToBMS = _portToBMS;
     }
     
+    //The following functions are all getters and setters for all of fields in this class
     
     public void setNumOfCells(int _numOfCells)
     {
         this.numOfCells = _numOfCells;
     }
-    
+
     public int getNumOfCells() 
     {
         return this.numOfCells;

@@ -165,13 +165,15 @@ public class MainController extends Thread{
                 continue;
             }
             
+            boolean prev = false;
+            
             /**
              * stay in this while loop if the user wants to charge and hasn't decide
              * to stop yet
              */
             while(this.realTimeData.getIsCharging())
             {
-                
+                prev = true;
                 /**
                  * If the system state is currently idle, only change the
                  * system state to charging only if the voltage, temperature,
@@ -243,8 +245,11 @@ public class MainController extends Thread{
                     }
                 }
             }
-            
-            this.dataCollector.setChargingRelay(false);
+            if(prev)
+            {
+                this.dataCollector.setChargingRelay(false);
+                prev = false;
+            }
             this.realTimeData.setState(RealTimeData.State.IDLE);
             try{
                 Thread.sleep(100);

@@ -56,72 +56,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.chargingParameters = _chargingParameters;
         this.realTimeData = _realTimeData;
         this.guiController = _guiController;
-        this.setLocation((int)(this.getGraphicsConfiguration().getBounds().getWidth()-this.getWidth())/2,(int)(this.getGraphicsConfiguration().getBounds().getHeight()-this.getHeight())/2);
-        /*
-        this.myController = myController;
-        this.numOfCells = myController.myController.numOfCells;
-        this.currVoltage = new double[8];
-        this.currTemp = new int[8];
-        this.bypass = new boolean[8];
-        this.diff = new double[8][8];
-        this.bTime = new int[8];
-        this.vUpper = myController.myController.vUpper;
-        this.iUpper = myController.myController.iUpper;
-        this.tempUpper = myController.myController.tempUpper;
-        this.bypassDuration = myController.myController.bypassDuration;
-        this.bypassThreshold = myController.myController.bypassThreshold;
-        
-        state = IDLE;
-        tick = 0;
-        isCharging = false;
-        chargingRelayOpen = true;
-        cycleTime = 0;
-        done = false;
-        
-        this.currVoltage[0] = this.vLower + (this.vUpper-this.vLower)/2 - 0.5;
-        this.currVoltage[1] = this.vLower + (this.vUpper-this.vLower)/2 - 0.2;
-        this.currVoltage[2] = this.vLower + (this.vUpper-this.vLower)/2 - 0.3;
-        this.currVoltage[3] = this.vLower + (this.vUpper-this.vLower)/2 - 0.4;
-        this.currVoltage[4] = this.vLower + (this.vUpper-this.vLower)/2 - 0.8;
-        this.currVoltage[5] = this.vLower + (this.vUpper-this.vLower)/2 - 0.7;
-        this.currVoltage[6] = this.vLower + (this.vUpper-this.vLower)/2 - 0.6;
-        this.currVoltage[7] = this.vLower + (this.vUpper-this.vLower)/2 - 0.5;
-        
-        this.currTemp[0] = (this.tempUpper)/2 - (this.tempUpper)/10;
-        this.currTemp[1] = (this.tempUpper)/2 - (this.tempUpper)/5;
-        this.currTemp[2] = (this.tempUpper)/2 - (this.tempUpper)/6;
-        this.currTemp[3] = (this.tempUpper)/2 - (this.tempUpper)/8;
-        this.currTemp[4] = (this.tempUpper)/2 - (this.tempUpper)/7;
-        this.currTemp[5] = (this.tempUpper)/2 - (this.tempUpper)/8;
-        this.currTemp[6] = (this.tempUpper)/2 - (this.tempUpper)/10;
-        this.currTemp[7] = (this.tempUpper)/2 - (this.tempUpper)/9;
-        
-        this.currCurrent = (this.iUpper)/2;
-        
-        this.setLocation((int)(this.getGraphicsConfiguration().getBounds().getWidth()-this.getWidth())/2,(int)(this.getGraphicsConfiguration().getBounds().getHeight()-this.getHeight())/2); 
-        
-        updateGUIBasedOnCellNumber();
-        updateGUIParameterRanges();
-        this.jProgressBar1.setValue(50);
-        this.jProgressBar2.setValue(50);
-        this.jProgressBar3.setValue(50);
-        this.jProgressBar4.setValue(50);
-        this.jProgressBar5.setValue(50);
-        this.jProgressBar6.setValue(50);
-        this.jProgressBar7.setValue(50);
-        this.jProgressBar8.setValue(50);
-        this.jProgressBar9.setValue(50);
-        this.jProgressBar10.setValue(50);
-        this.jProgressBar11.setValue(50);
-        this.jProgressBar12.setValue(50);
-        this.jProgressBar13.setValue(50);
-        this.jProgressBar14.setValue(50);
-        this.jProgressBar15.setValue(50);
-        this.jProgressBar16.setValue(50);
-        this.jProgressBar17.setValue(50);
-        this.jProgressBar18.setValue(50);
-        */
-        
+        this.setLocation((int)(this.getGraphicsConfiguration().getBounds().getWidth()-this.getWidth())/2,(int)(this.getGraphicsConfiguration().getBounds().getHeight()-this.getHeight())/2);   
         updateGUI();
     }
     
@@ -884,85 +819,25 @@ public class ChargingMonitor extends javax.swing.JFrame{
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         this.guiController.userRequestedCharge();
-        /*
-        this.realTimeData.setIsCharging(true);
-        this.jButton1.setEnabled(false);
-        if(this.realTimeData.getDone())
-        {
-            for(int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
-            {
-                checkForBypass(i);
-                if(!this.realTimeData.getBypassInfo(i))
-                {
-                    done = false;
-                }
-            }
-            
-            for(int i = 0; i < numOfCells; i++)
-            {
-                if(currTemp[i]>=tempUpper)
-                {
-                    done = true;
-                }
-            }
-            if(!done && currCurrent >= iUpper)
-            {
-                done = true;
-            }
-        }
-        */
-        //charge();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         this.guiController.userRequestedStop();
-        /*
-        this.myController.setVisible(true);
-        this.dispose();
-        */
-        /*
-        if(state == CHARGING)
-        {
-           FreeWindow warningWindow = new FreeWindow(this, null, "WARNING!","Stop charging before you return to the previous window");
-        }else
-        {
-            this.myController.setVisible(true);
-            this.dispose();
-        }
-        */
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
-        //this.myController.setVisible(true);
-        //this.dispose();
         this.guiController.exitAndCleanUp();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-        //FreeWindow aboutSoftwareWindow = new FreeWindow(this,null, "About this Software","Still under heavy development by Siyuan Wang.\r\n\r\nWe just hit Version 1.1");
         this.guiController.userRequestedAboutTheSoftware();
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
-        String contents = "John Augelli";
-         contents += "\r\n"+"Brendan Flood";
-         contents += "\r\n"+"Brendan Flood";
-         contents += "\r\n"+"Sabbir Siddiqui";
-         contents += "\r\n"+"Jack Fedak";
-         contents += "\r\n"+"Amira Ahsan";
-         contents += "\r\n"+"Kai Wang";
-         contents += "\r\n"+"Jacob Hartwig";
-         contents += "\r\n"+"Ethan Swerdlow";
-         contents += "\r\n"+"Gerald DeBrasi";
-         contents += "\r\n"+"Siyuan Wang";
-        
-        //FreeWindow AboutTeamWindow = new FreeWindow(this,null, "About the Team",contents);
-         this.guiController.userRequestedAboutTheTeam();
+        this.guiController.userRequestedAboutTheTeam();
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
-        //FreeWindow helpWindow = new FreeWindow(this,null, "Help","Please don't hesitate to call 4845158114 for any additional assistance.");
         this.guiController.userRequestedDocumentation();
     }//GEN-LAST:event_jMenuItem6ActionPerformed
 
@@ -981,6 +856,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.jLabel20.setText("Voltage(0-"+this.chargingParameters.getVoltageUpperLimit()+"V)");
         this.jLabel21.setText("Temperature(0-"+this.chargingParameters.getTemperatureUpperLimit()+" Celsius)");
     }
+    
     public void updateGUIBasedOnCellNumber()
     {
         int numOfCells = this.chargingParameters.getNumOfCells();
@@ -1040,8 +916,6 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar10.setVisible(false);
             this.jLabel2.setVisible(false);
             this.jLabel28.setVisible(false);
-            //this.jLabel26.setVisible(false);
-            //this.jLabel26.setLocation((int)(this.jLabel2.getLocation().getX()+206),(int)this.jLabel2.getLocation().getY());
         }
     }    
     

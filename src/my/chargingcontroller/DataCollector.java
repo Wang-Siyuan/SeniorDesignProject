@@ -25,6 +25,12 @@ public class DataCollector extends Thread{
     private static final String BYPASS_ON = "0001";
     private static final String BYPASS_OFF = "0000";
     private static final String BMS_VALID_TEST = "0042";
+    private static final String PATH_FOR_DATA_RECORDING = "";
+    private static final String PATH_FOR_ERROR_LOG = "";
+    private static final String FILE_NAME_FOR_DATA_RECORDING = "ChargingCharacteristics.txt";
+    private static final String FILE_NAME_FOR_ERROR_LOG = "ErrorLog.txt";
+    
+    
     // The MainController is the DataCollecotor's parent in the control hierarchy
     private MainController mainController = null;
     
@@ -123,6 +129,7 @@ public class DataCollector extends Thread{
                 serialPort = this.connect(this.chargingParameters.getListOfPorts().get(i));
             }catch(PortInUseException e)
             {
+                this.writeToErrorFile("Port["+this.chargingParameters.getListOfPorts().get(i)+"] is already in use");
                 continue;
             }
             
@@ -171,7 +178,7 @@ public class DataCollector extends Thread{
             {
                 if(!this.stringBuffer.equals(""))
                 {
-                    System.out.println("Have something in the string buffer, but it isn't the correct respond message");
+                    this.writeToErrorFile("Received some data when trying to connect to Arduino and BMS, but it isn't the correct respond message");
                 }
                 
                 /*  Dear future engineers, if you could make the following calls
@@ -190,6 +197,13 @@ public class DataCollector extends Thread{
                 return true;
             }
         }
+        
+        if(!BMSfound)
+        {
+            this.writeToErrorFile("BMS board not found");
+        }else{
+            this.writeToErrorFile("Arduino board not found");
+        }
         return false;
     }
     
@@ -200,11 +214,28 @@ public class DataCollector extends Thread{
     public void writeToFile(String content)
     {
         try {
-            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+//            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+              PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_DATA_RECORDING+FILE_NAME_FOR_DATA_RECORDING, true)));
+
             out.println(content);
             out.close();
         } catch (IOException e) {
-            //error handling
+            System.out.println("Invalid path name for Charging Characteristic file");
+            System.exit(1);
+        }
+    }
+    
+    public void writeToErrorFile(String error)
+    {
+        try {
+//            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+              PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_ERROR_LOG+FILE_NAME_FOR_ERROR_LOG, true)));
+
+            out.println(error);
+            out.close();
+        } catch (IOException e) {
+            System.out.println("Invalid path name for Error file");
+            System.exit(1);
         }
     }
     
@@ -228,6 +259,7 @@ public class DataCollector extends Thread{
         {
             bytesToWrite[0] += 1;
         }else{
+            this.writeToErrorFile("Invalid cell index found.");
             return null;
         } 
        return bytesToWrite;
@@ -279,21 +311,21 @@ public class DataCollector extends Thread{
                 stringToWrite += (System.currentTimeMillis())/1000;
                 stringToWrite += "\t";
                 stringToWrite += actual_voltage;
-                stringToWrite += "\n";
                 
                 if(this.realTimeData.getIsCharging())
                 {
-                    System.out.println(stringToWrite);
                     this.writeToFile(stringToWrite);
                 }
                 
                 //reset the string buffer to empty
                 this.stringBuffer = "";
                 return actual_voltage;
+            }else{
+                this.writeToErrorFile("Invalid data read from BMS when trying to get cell voltage");
             }
         }catch(Exception e)
         {
-           //error handling 
+            this.writeToErrorFile("Exceptions occurred when trying to get cell voltage.");
         }
         return 0;
     }
@@ -331,11 +363,13 @@ public class DataCollector extends Thread{
                 this.stringBuffer = "";
                 
                 return actual_temperature;
+            }else{
+                this.writeToErrorFile("Invalid data read from BMS when trying to get cell temperature");
             }
         
         }catch(Exception e)
         {
-            //error handling
+            this.writeToErrorFile("Exceptions occurred when trying to get cell temperature.");
         }
         return 0;
     }
@@ -345,7 +379,8 @@ public class DataCollector extends Thread{
         //The parameters used for conversion equation
         double v_ref = 2.048;
         double gain = 305;
-        double v_off = -0.0022;
+//        double v_off = -0.0022;
+        double v_off = -0.0066;
         double resistance_bar = 0.000021;
         
         //initialize some local variables
@@ -353,12 +388,12 @@ public class DataCollector extends Thread{
         double actual_current = 0;
         
         //The command used to get current in I2C
-        byte[] temp = {'0','2','1','2','R','0','2'};
+        byte[] bytesToWrite = {'0','2','1','2','R','0','2'};
         
         try{
             
             //write the command to the BMS board
-            this.sw[this.writerIndexForBMS].writeToSerial(temp);
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             
             //wait for the SerialReader to update the buffer
             Thread.sleep(SLEEP_TIME_FOR_READER);
@@ -376,11 +411,14 @@ public class DataCollector extends Thread{
                 this.stringBuffer = "";
                 
                 return actual_current;
+            }else
+            {
+                this.writeToErrorFile("Invalid data read from BMS when trying to get pack current");
             }
         
         }catch(Exception e)
         {
-            //error handling
+            this.writeToErrorFile("Exceptions occurred when trying to get pack current.");
         }
         return 0;
     }
@@ -433,11 +471,13 @@ public class DataCollector extends Thread{
                 //reset the string buffer
                 this.stringBuffer = "";
                 return timeToReturn;
+            }else
+            {
+                this.writeToErrorFile("Invalid data read from BMS when trying to get cell bypass time");
             }
         }catch(Exception e)
         {
-            //error handling
-        }
+                this.writeToErrorFile("Exceptions occurred when trying to get cell bypass time.");         }
         return 0;
     }
     
@@ -463,7 +503,7 @@ public class DataCollector extends Thread{
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
         }catch(Exception e)
         {
-            
+            this.writeToErrorFile("Exceptions occurred when trying to set bypass switch.");
         }
     }
     
@@ -494,11 +534,14 @@ public class DataCollector extends Thread{
                 {
                     return -1;
                 }
+            }else
+            {
+                this.writeToErrorFile("Invalid data read from BMS when trying to get cell bypass state");
             }
         
         }catch(Exception e)
         {
-            //error handling
+            this.writeToErrorFile("Exceptions occurred when trying to get bypass state.");
         }
         return -1;
     }
@@ -510,8 +553,7 @@ public class DataCollector extends Thread{
         //handle the error if the port is already owned
         if ( portIdentifier.isCurrentlyOwned() )
         {
-            System.out.println("Error: Port is currently in use");
-            //error handling
+            this.writeToErrorFile("Port is already in use when trying to connect to a serial port.");
         }
         else
         {
@@ -554,12 +596,10 @@ public class DataCollector extends Thread{
                         {
                             listOfPorts.add(com.getName());
                         }
-                        System.out.print(com.getName()+"\r\n");
                     } catch (PortInUseException e) {
-                        System.out.println("Port"+ com.getName() + "already used found when looking for ports");
+                        this.writeToErrorFile(com.getName() + " is already in use when trying to look for ports");
                     } catch (Exception e) {
-                        System.err.println("Failed to open port " + com.getName());
-                        e.printStackTrace();
+                        this.writeToErrorFile("Failed to open port " + com.getName());
                     }
             }
         }
@@ -588,7 +628,7 @@ public class DataCollector extends Thread{
             }
         }catch(Exception e)
         {
-            
+            this.writeToErrorFile("Exceptions occurred when trying to set charging relay.");
         }
     }
     
@@ -614,12 +654,11 @@ public class DataCollector extends Thread{
             {
                 return true;
             }else{
-                //error handling
-                System.out.println("This is what I got: " + this.stringBuffer);
+                this.writeToErrorFile("Invalid data read from BMS when trying to test cell");
             }
         }catch(Exception e)
         {
-            //error handling
+            this.writeToErrorFile("Exceptions occurred when trying to test cell.");
         }
         return false;
     }
@@ -683,6 +722,7 @@ public class DataCollector extends Thread{
                     this.realTimeData.setErrorMessage("");
                     this.realTimeData.setErrorOccurred(false);
                     
+                    //always initialize this boolean variable to false
                     errorOccurred = false;
                     
                     //read the current
@@ -691,10 +731,6 @@ public class DataCollector extends Thread{
                     if( currentReading != 0 )
                     {
                         this.realTimeData.setCurrent(currentReading);
-                    }else{
-                        //some specifial error handling
-                        //errorOccurred = true;
-                        //this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Current Value \n");
                     }
                     
                     this.turnOffAllBypass();
