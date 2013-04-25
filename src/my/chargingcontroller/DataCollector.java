@@ -20,7 +20,7 @@ public class DataCollector extends Thread{
     private static final byte ARDUINO_COMMAND_ON = 'a';
     private static final byte ARDUINO_COMMAND_OFF = 'b';
     private static final int SLEEP_TIME_FOR_READER = 1000;
-    private static final int SLEEP_TIME_BTW_EACH_DATA_ACQUISITION = 1000;
+    private static final int SLEEP_TIME_BTW_EACH_DATA_ACQUISITION = 100;
     private static final String BMS_INVALID_MSG = "FFFF";
     private static final String BYPASS_ON = "0001";
     private static final String BYPASS_OFF = "0000";
@@ -380,7 +380,8 @@ public class DataCollector extends Thread{
         double v_ref = 2.048;
         double gain = 305;
 //        double v_off = -0.0022;
-        double v_off = -0.0066;
+//        double v_off = -0.0006;
+        double v_off = 0;
         double resistance_bar = 0.000021;
         
         //initialize some local variables
