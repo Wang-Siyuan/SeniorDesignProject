@@ -16,12 +16,12 @@ public class MainController extends Thread{
     private RealTimeData realTimeData;
     private GUIController guiController = null;
     private DataCollector dataCollector = null;
-    
+    private long chargingStartTime = 0;
     /**
      * Constructor of MainController
      */
     public MainController() {
-        
+                
         /* generate a set of default charging parameters */
         int numOfCells = 8;
         double vUpper = 4;
@@ -33,6 +33,7 @@ public class MainController extends Thread{
         ArrayList<String> listOfPorts = new ArrayList<String>();
         String portToPC = "";
         String portToArduino = "";
+        int ChargingTime = 180;
         defaultChargingParameters = new ChargingParameters(     numOfCells, 
                                                                 vUpper,
                                                                 iUpper, 
@@ -42,7 +43,8 @@ public class MainController extends Thread{
                                                                 bypassCutoff,
                                                                 listOfPorts,
                                                                 portToPC,
-                                                                portToArduino );
+                                                                portToArduino,
+                                                                ChargingTime );
         
         /* generate a set of default real time data */
         double[] vCurr = new double[8];
@@ -63,6 +65,7 @@ public class MainController extends Thread{
         int tick = 0;
         boolean errorOccurred = false;
         String errorMessage = "";
+        int currentChargingTime = 0;
 
         defaultRealTimeData= new RealTimeData(  vCurr, 
                                                 iCurr, 
@@ -77,7 +80,8 @@ public class MainController extends Thread{
                                                 cycleTime,
                                                 tick,
                                                 errorOccurred,
-                                                errorMessage);
+                                                errorMessage,
+                                                currentChargingTime);
         
         /* initialize the charging parameter and real time data to be the default ones */
         this.chargingParameters = this.defaultChargingParameters;
@@ -196,6 +200,7 @@ public class MainController extends Thread{
                     {
                         this.realTimeData.setState(RealTimeData.State.CHARGING);
                         this.dataCollector.setChargingRelay(true);
+                        this.chargingStartTime = System.currentTimeMillis();
                     }
                 }
                 
@@ -204,6 +209,7 @@ public class MainController extends Thread{
                  */
                 if(this.realTimeData.getState().equals(RealTimeData.State.CHARGING))
                 {
+                    this.realTimeData.setCurrentChargingTime((int)((System.currentTimeMillis() - this.chargingStartTime)/60000));
                     if(this.checkForCellOvercharge())
                     {
                         //tell the user at least one of the cells is overcharged

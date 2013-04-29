@@ -20,6 +20,7 @@ public class ChargingParameters {
     private ArrayList<String> listOfPorts = null;
     private String portToBMS = null;
     private String portToArduino = null;
+    private int chargingTime = 0;
     
     /**
      * Default Constructor
@@ -38,7 +39,7 @@ public class ChargingParameters {
                                 int _tUpper, int _bypassDuration,
                                 int _bypassThreshold, double _bypassCutoff, 
                                 ArrayList<String> _listOfPorts,
-                                String _portToBMS, String _portToArduino )
+                                String _portToBMS, String _portToArduino, int _chargingTime )
     {
         this.numOfCells = _numOfCells;
         this.vUpper = _vUpper;
@@ -50,6 +51,7 @@ public class ChargingParameters {
         this.listOfPorts = _listOfPorts;
         this.portToArduino = _portToArduino;
         this.portToBMS = _portToBMS;
+        this.chargingTime = _chargingTime;
     }
     
     /**
@@ -72,11 +74,12 @@ public class ChargingParameters {
      * @param _listOfPorts
      * @param _portToBMS
      * @param _portToArduino 
+     * @param _chargingTime
      */
     public void setParameters(  int _numOfCells, double _vUpper, double _iUpper, 
                                 int _tUpper, int _bypassDuration, double _bypassCutoff,
                                 int _bypassThreshold, ArrayList<String> _listOfPorts,
-                                String _portToBMS, String _portToArduino )
+                                String _portToBMS, String _portToArduino, int _chargingTime )
     {
         this.numOfCells = _numOfCells;
         this.vUpper = _vUpper;
@@ -88,6 +91,7 @@ public class ChargingParameters {
         this.listOfPorts = _listOfPorts;
         this.portToArduino = _portToArduino;
         this.portToBMS = _portToBMS;
+        this.chargingTime = _chargingTime;
     }
     
     //The following functions are all getters and setters for all of fields in this class
@@ -190,5 +194,15 @@ public class ChargingParameters {
     public double getBypassCutoff()
     {
         return this.bypassCutoff;
+    }
+    
+    public void setChargingTime(int _chargingTime)
+    {
+        this.chargingTime = _chargingTime;
+    }
+    
+    public int getChargingTime()
+    {
+        return this.chargingTime;
     }
 }

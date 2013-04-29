@@ -39,6 +39,7 @@ public class RealTimeData {
     
     private boolean errorOccurred;
     private String errorMessage;
+    private int currentChargingTime;
     
     
     public RealTimeData(    double[] _vCurr, 
@@ -54,7 +55,8 @@ public class RealTimeData {
                             int _cycleTime,
                             int _tick, 
                             boolean _errorOccurred,
-                            String _errorMessage)
+                            String _errorMessage,
+                            int _currentChargingTime)
     {
         this.vCurr = _vCurr;
         this.iCurr = _iCurr;
@@ -70,6 +72,7 @@ public class RealTimeData {
         this.tick = _tick;
         this.errorOccurred = _errorOccurred;
         this.errorMessage = _errorMessage;
+        this.currentChargingTime = _currentChargingTime;
         
         maxTemp = tCurr[0];
         for (int i = 1; i < tCurr.length; i++)
@@ -234,5 +237,15 @@ public class RealTimeData {
     public void setErrorMessage(String _errorMessage)
     {
         this.errorMessage = _errorMessage;
+    }
+    
+    public void setCurrentChargingTime(int _currentChargingTime)
+    {
+        this.currentChargingTime = _currentChargingTime;
+    }
+    
+    public int getCurrentChargingTime()
+    {
+        return this.currentChargingTime;
     }
 }

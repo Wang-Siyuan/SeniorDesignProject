@@ -982,12 +982,15 @@ public class ChargingMonitor extends javax.swing.JFrame{
        if(realTimeData.getDone())
         {
              jLabel9.setText("DONE");
+             this.jLabel10.setText("Charging Monitor");
         }else if(realTimeData.getState() == realTimeData.state.CHARGING)
         {
             jLabel9.setText("CHARGING");
+            this.jLabel10.setText("Charging Time Left: " + (this.chargingParameters.getChargingTime() - this.realTimeData.getCurrentChargingTime()) + " min");
         }else if(realTimeData.getState() == realTimeData.state.IDLE)
         {
             jLabel9.setText("IDLE");
+            this.jLabel10.setText("Charging Monitor");
         }else
         {
             //error handling

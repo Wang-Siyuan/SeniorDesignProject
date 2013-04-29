@@ -40,6 +40,8 @@ public class ParameterSetup extends javax.swing.JFrame {
         this.jTextField4.setText(""+this.chargingParameters.getCurrentUpperLimit());
         this.jTextField5.setText(""+this.chargingParameters.getBypassDuration());
         this.jTextField6.setText(""+this.chargingParameters.getBypassThreshold());
+        this.jTextField2.setText(""+this.chargingParameters.getChargingTime());
+        this.jTextField7.setText("");
     }
 
     /**
@@ -215,6 +217,11 @@ public class ParameterSetup extends javax.swing.JFrame {
         jTextField2.setFont(jLabel2.getFont());
         jTextField2.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         jTextField2.setText("120");
+        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField2ActionPerformed(evt);
+            }
+        });
 
         jLabel3.setFont(jLabel2.getFont());
         jLabel3.setText("min");
@@ -337,7 +344,17 @@ public class ParameterSetup extends javax.swing.JFrame {
 //            this.chargingParameters.setNumOfCells(numOfCells);
 //        }
         //System.out.println("num of cells has been set to: "+this.myController.numOfCells);
-
+        int chargingTime = Integer.parseInt(this.jTextField2.getText());
+        
+        if(chargingTime > 0)
+        {
+            this.chargingParameters.setChargingTime(chargingTime);
+        }else
+        {
+            error = true;
+            warningMsg += "Charging Time is a non-positive value"+eol;
+        }
+        
         Double vUpper = Double.parseDouble(this.jTextField1.getText());
         if(vUpper<0 || vUpper >5)
         {
@@ -442,6 +459,10 @@ public class ParameterSetup extends javax.swing.JFrame {
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
        this.createPopUpWindowForLoadingParameters();
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2ActionPerformed
     
     public void createPopUpWindowForLoadingParameters()
     {
@@ -475,17 +496,20 @@ public class ParameterSetup extends javax.swing.JFrame {
             while((currLine = br.readLine()) != null) {
                 if(counter == 0)
                 {
-                    this.jTextField1.setText(currLine);
+                    this.jTextField2.setText(currLine);
                 }else if(counter == 1)
                 {
-                    this.jTextField3.setText(currLine);
+                    this.jTextField1.setText(currLine);
                 }else if(counter == 2)
                 {
-                    this.jTextField4.setText(currLine);
+                    this.jTextField3.setText(currLine);
                 }else if(counter == 3)
                 {
-                    this.jTextField5.setText(currLine);
+                    this.jTextField4.setText(currLine);
                 }else if(counter == 4)
+                {
+                    this.jTextField5.setText(currLine);
+                }else if(counter == 5)
                 {
                     this.jTextField6.setText(currLine);
                     done = true;
@@ -509,8 +533,8 @@ public class ParameterSetup extends javax.swing.JFrame {
         try {
  
                 // content = this.jSpinner1.getValue() + System.getProperty( "line.separator" );
-                String content = this.jTextField1.getText() + System.getProperty( "line.separator" );
-                //content += this.jTextField2.getText() + System.getProperty( "line.separator" );
+                String content = this.jTextField2.getText() + System.getProperty( "line.separator" );
+                content += this.jTextField1.getText() + System.getProperty( "line.separator" );
                 content += this.jTextField3.getText() + System.getProperty( "line.separator" );
                 content += this.jTextField4.getText() + System.getProperty( "line.separator" );
                 content += this.jTextField5.getText() + System.getProperty( "line.separator" );
