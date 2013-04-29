@@ -75,7 +75,7 @@
           <SubComponents>
             <Menu class="javax.swing.JMenu" name="jMenu8">
               <Properties>
-                <Property name="text" type="java.lang.String" value="BMS"/>
+                <Property name="text" type="java.lang.String" value="BMS Port Name"/>
               </Properties>
               <SubComponents>
                 <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
@@ -87,7 +87,7 @@
             </Menu>
             <Menu class="javax.swing.JMenu" name="jMenu9">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Arduino"/>
+                <Property name="text" type="java.lang.String" value="Arduino Port Name"/>
               </Properties>
               <SubComponents>
                 <MenuItem class="javax.swing.JMenuItem" name="jMenuItem7">
@@ -99,7 +99,7 @@
             </Menu>
             <Menu class="javax.swing.JMenu" name="jMenu11">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Set Bypass"/>
+                <Property name="text" type="java.lang.String" value="Set Bypass with Board Address:"/>
               </Properties>
               <SubComponents>
                 <Menu class="javax.swing.JMenu" name="jMenu12">

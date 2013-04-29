@@ -741,21 +741,21 @@ public class ChargingMonitor extends javax.swing.JFrame{
 
         jMenu7.setText("Tools");
 
-        jMenu8.setText("BMS");
+        jMenu8.setText("BMS Port Name");
 
         jMenuItem1.setText("Unknown Port");
         jMenu8.add(jMenuItem1);
 
         jMenu7.add(jMenu8);
 
-        jMenu9.setText("Arduino");
+        jMenu9.setText("Arduino Port Name");
 
         jMenuItem7.setText("Unknown Port");
         jMenu9.add(jMenuItem7);
 
         jMenu7.add(jMenu9);
 
-        jMenu11.setText("Set Bypass");
+        jMenu11.setText("Set Bypass with Board Address:");
 
         jMenu12.setText("0x02");
 

@@ -50,6 +50,8 @@ public class DataCollector extends Thread{
     //only one SerialReader is needed since it will never block
     private SerialReader sr = null;
     
+    private SerialReader sr_arduino = null;
+    
     /* 
      * This is the buffer that the SerialReader will update when it receive new
      * bytes serially
@@ -138,12 +140,20 @@ public class DataCollector extends Thread{
             InputStream in = serialPort.getInputStream();
             OutputStream out = serialPort.getOutputStream();
 
-            this.sr.setInputStream(in);
-            this.sr.setDataCollector(this);
-            if(this.sr.isStopped())
+//            this.sr.setInputStream(in);
+//            this.sr.setDataCollector(this);
+//            if(this.sr.isStopped())
+//            {
+//                this.sr.startThread();
+//            }     
+            
+            SerialReader tempSR = new SerialReader(this, in);
+            tempSR.start();
+            if(tempSR.isStopped())
             {
-                this.sr.startThread();
-            }          
+                tempSR.startThread();
+            }
+            
             this.sw[i].setOutputStream(out);
             
             if(!this.sw[i].isAlive())
@@ -160,6 +170,7 @@ public class DataCollector extends Thread{
                  * update all the field in the DataCollector class that is related
                  * to the BMS board
                  */
+                this.sr = tempSR;
                 this.portnameToBMS = this.chargingParameters.getListOfPorts().get(i);
                 this.portToBMS = serialPort;
                 this.writerIndexForBMS = i;
@@ -170,6 +181,7 @@ public class DataCollector extends Thread{
                  * update all the field in the DataCollector class that is related
                  * to the Arduino board
                  */
+                this.sr_arduino = tempSR;
                 this.portToArduino = serialPort;
                 this.portnameToArduino = this.chargingParameters.getListOfPorts().get(i);
                 this.writerIndexForArduino = i;
@@ -683,6 +695,29 @@ public class DataCollector extends Thread{
         }
     }
     
+    public boolean testArduino()
+    {
+        byte byteToWrite = 'd';
+
+        try{      
+            this.stringBuffer = "";
+            this.sw[this.writerIndexForArduino].writeToSerialForArduino(byteToWrite);
+            Thread.sleep(2000);
+            if(this.stringBuffer.equals(ARDUINO_CONFIRM_ONE)||this.stringBuffer.equals(ARDUINO_CONFIRM_TWO))
+            {
+                System.out.println("Test Passed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+               return true;
+            }else
+            {
+                System.out.println("test didn't pass, I got this:"+ this.stringBuffer+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+        }catch(Exception e)
+        {
+            this.writeToErrorFile("Exceptions occurred when trying to pin the Arduino board.");
+        }
+        return false;
+    }
+    
     /**
      * This function will ping the cell with the corresponding index
      * 
@@ -754,7 +789,8 @@ public class DataCollector extends Thread{
         double voltageReading = 0;
         int tempReading = 0;
         int bypassState = -1;
-
+        boolean initiatePingToArduino = true;
+        
         try{
             
             //only proceed if both ports are found
@@ -790,7 +826,7 @@ public class DataCollector extends Thread{
                     currentReading = this.getPackCurrent();
                     
                     this.realTimeData.setCurrent(currentReading);
-                    System.out.println("I set currrent to be:" + currentReading + "***************************************");
+                    System.out.println("currrent is:" + currentReading + "***************************************");
 
                     this.turnOffAllBypass();
                     
@@ -850,6 +886,19 @@ public class DataCollector extends Thread{
                             this.realTimeData.setErrorOccurred(true);
                             this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"No Cell Detected.  Please check if one of the cells have address 0x02\n");
                             errorOccurred = true;
+                        }
+                    }
+                    
+                    if(initiatePingToArduino)
+                    {
+                        initiatePingToArduino = false;
+                    }else
+                    {
+                        if(!this.testArduino())
+                        {
+                            errorOccurred = true;
+                            this.realTimeData.setErrorOccurred(true);
+                            this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"The Arduino Board is disconnected\n");
                         }
                     }
                     
