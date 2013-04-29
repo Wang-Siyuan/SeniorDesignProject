@@ -213,8 +213,22 @@ public class MainController extends Thread{
                  */
                 if(this.realTimeData.getState().equals(RealTimeData.State.CHARGING))
                 {
-                    this.realTimeData.setCurrentChargingTime((int)((System.currentTimeMillis() - this.chargingStartTime)/60000));
-                    if(this.checkForCellOvercharge())
+                    int currentChargingTime = (int)((System.currentTimeMillis() - this.chargingStartTime)/60000);
+                    this.realTimeData.setCurrentChargingTime(currentChargingTime);
+                    if((this.chargingParameters.getChargingTime() - currentChargingTime) <= 0)
+                    {
+                        //tell the user at least one of the cells is overcharged
+                        //charging was finished
+                        this.realTimeData.setIsCharging(false);
+                        this.realTimeData.setState(RealTimeData.State.IDLE);
+                        this.dataCollector.setChargingRelay(false);
+                        this.guiController.createdPopupDialog("Message", "Charging is not done, but charging timeout expired!");
+                        for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
+                        {
+                            this.dataCollector.setBypassSwitch(j, false);
+                        }
+                    }
+                    else if(this.checkForCellOvercharge())
                     {
                         //tell the user at least one of the cells is overcharged
                         //charging was finished
@@ -235,6 +249,10 @@ public class MainController extends Thread{
                         this.guiController.createdPopupDialog("Warning", "Charging is stopped because at least one of the cells is overheating.");
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
+                        for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
+                        {
+                            this.dataCollector.setBypassSwitch(j, false);
+                        }
                     }else if(this.checkForCurrentOverLimit())
                     {
                         //tell the user the current is over the limit
@@ -243,6 +261,10 @@ public class MainController extends Thread{
                         this.guiController.createdPopupDialog("Warning", "Charging is stopped because the current is already over the upper limit.");
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
+                        for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
+                        {
+                            this.dataCollector.setBypassSwitch(j, false);
+                        }
                     }else
                     {
                         for (int i = 0; i < this.chargingParameters.getNumOfCells(); i++)

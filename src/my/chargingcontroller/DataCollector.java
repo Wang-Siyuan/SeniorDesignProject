@@ -319,6 +319,7 @@ public class DataCollector extends Thread{
                 
                 //reset the string buffer to empty
                 this.stringBuffer = "";
+                System.out.println("Cell Voltage is: "+actual_voltage+ "*************************************************");
                 return actual_voltage;
             }else{
                 this.writeToErrorFile("Invalid data read from BMS when trying to get cell voltage");
