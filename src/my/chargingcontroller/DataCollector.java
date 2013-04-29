@@ -25,8 +25,8 @@ public class DataCollector extends Thread{
     private static final String BYPASS_ON = "0001";
     private static final String BYPASS_OFF = "0000";
     private static final String BMS_VALID_TEST = "0042";
-    private static final String PATH_FOR_DATA_RECORDING = "";
-    private static final String PATH_FOR_ERROR_LOG = "";
+    private static final String PATH_FOR_DATA_RECORDING = "..\\";
+    private static final String PATH_FOR_ERROR_LOG = "..\\";
     private static final String FILE_NAME_FOR_DATA_RECORDING = "ChargingCharacteristics.txt";
     private static final String FILE_NAME_FOR_ERROR_LOG = "ErrorLog.txt";
     
@@ -95,6 +95,7 @@ public class DataCollector extends Thread{
         
         //initialize the string buffer for the SerialReader
         stringBuffer = "";
+
     }
     
     /**
@@ -215,8 +216,7 @@ public class DataCollector extends Thread{
     {
         try {
 //            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
-              PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_DATA_RECORDING+FILE_NAME_FOR_DATA_RECORDING, true)));
-
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_DATA_RECORDING+FILE_NAME_FOR_DATA_RECORDING, true)));
             out.println(content);
             out.close();
         } catch (IOException e) {
@@ -225,13 +225,19 @@ public class DataCollector extends Thread{
         }
     }
     
+    /**
+     * Write message to the local error file to log the error
+     * @param error 
+     */
     public void writeToErrorFile(String error)
     {
         try {
-//            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
-              PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_ERROR_LOG+FILE_NAME_FOR_ERROR_LOG, true)));
+//          PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_ERROR_LOG+FILE_NAME_FOR_ERROR_LOG, true)));
 
-            out.println(error);
+            out.print(error);
+            Date date = new Date(System.currentTimeMillis());
+            out.println(date.toString());
             out.close();
         } catch (IOException e) {
             System.out.println("Invalid path name for Error file");
@@ -311,6 +317,9 @@ public class DataCollector extends Thread{
                 stringToWrite += (System.currentTimeMillis())/1000;
                 stringToWrite += "\t";
                 stringToWrite += actual_voltage;
+                stringToWrite += "\t";
+                Date date = new Date(System.currentTimeMillis());
+                stringToWrite += date.toString();
                 
                 if(this.realTimeData.getIsCharging())
                 {
@@ -331,6 +340,12 @@ public class DataCollector extends Thread{
         return 0;
     }
     
+    /**
+     * This function will retrieve the temperature of the cell that has the index
+     * passed in
+     * @param index range from 1 to 8(inclusive)
+     * @return real temperature value in double
+     */
     public int getCellTemp(int index)
     {
         //parameters in the conversion equation
@@ -375,6 +390,10 @@ public class DataCollector extends Thread{
         return 0;
     }
     
+    /**
+     * This function will retrieve the current for the pack
+     * @return real current value in double
+     */
     public double getPackCurrent()
     {
         //The parameters used for conversion equation
@@ -426,6 +445,12 @@ public class DataCollector extends Thread{
         return 0;
     }
     
+    /**
+     * This function will retrieve the bypass time of each cell that has the index
+     * passed in
+     * @param index range from 1 to 8(inclusive)
+     * @return bypass time in milliseconds
+     */
     public long getBypassTime(int index)
     {
         //local variables to store values
@@ -484,6 +509,12 @@ public class DataCollector extends Thread{
         return 0;
     }
     
+    /**
+     * This function will set the bypass status based on the index and bypass status
+     * passed in
+     * @param index range from 1 to 8(inclusive)
+     * @param isOn This indicates the bypass status to set
+     */
     public void setBypassSwitch(int index, boolean isOn)
     {
         //The command used to set bypass switch
@@ -510,6 +541,12 @@ public class DataCollector extends Thread{
         }
     }
     
+    /**
+     * This function will retrieve the bypass status of the cell that has the index
+     * passed in
+     * @param index range from 1 to 8(inclusive)
+     * @return bypass status in boolean
+     */
     public int getBypassState(int index)
     {
         //command used to get bypass state
@@ -549,6 +586,12 @@ public class DataCollector extends Thread{
         return -1;
     }
     
+    /**
+     * This function will attempt to connect to a serial port with the given port number
+     * passed in
+     * @param portName the name of the port to connect
+     * @return the SerialPort instance with the connection
+     */
     SerialPort connect ( String portName ) throws Exception
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
@@ -579,6 +622,11 @@ public class DataCollector extends Thread{
         return null;
     }
     
+    
+    /**
+     * This function will look for all the port names and store them in the ArrayList
+     * held by this class
+     */
     public void lookForPorts() {
         ArrayList<String> listOfPorts = new ArrayList<String>();
         
@@ -635,7 +683,12 @@ public class DataCollector extends Thread{
         }
     }
     
-    
+    /**
+     * This function will ping the cell with the corresponding index
+     * 
+     * @param index range from 1 to 8(inclusive)
+     * @return true indicating the test passed
+     */
     public boolean testCell(int index)
     {       
         //the command to verify if the cell is there
@@ -657,7 +710,7 @@ public class DataCollector extends Thread{
             {
                 return true;
             }else{
-                this.writeToErrorFile("Invalid data read from BMS when trying to test cell");
+                //this.writeToErrorFile("Invalid data read from BMS when trying to test cell");
             }
         }catch(Exception e)
         {
@@ -666,6 +719,11 @@ public class DataCollector extends Thread{
         return false;
     }
     
+    
+    /**
+     * This function will turn off(open) all the bypass switches
+     * 
+     */
     public void turnOffAllBypass()
     {
         //go through all the cells and turn off bypass if they are on
@@ -731,12 +789,9 @@ public class DataCollector extends Thread{
                     //read the current
                     currentReading = this.getPackCurrent();
                     
-                    //if( currentReading != 0 )
-                    //{
-                        this.realTimeData.setCurrent(currentReading);
-                        System.out.println("I set currrent to be:" + currentReading + "***************************************");
-                    //}
-                    
+                    this.realTimeData.setCurrent(currentReading);
+                    System.out.println("I set currrent to be:" + currentReading + "***************************************");
+
                     this.turnOffAllBypass();
                     
                     //go through all possible cells
@@ -812,16 +867,16 @@ public class DataCollector extends Thread{
                         Thread.sleep(SLEEP_TIME_BTW_EACH_DATA_ACQUISITION);
                     }catch(Exception e)
                     {
-                        //error handling
+                        this.writeToErrorFile("Cannot set the DataCollector Thread to sleep");
                     }
                 }
             }else
             {
-                //error handling
+                //This error should have already been logged
             }
         }catch(Exception e)
         {
-            //error handling
+           //These error should have already been logged
         }
     }
     

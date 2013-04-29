@@ -5,23 +5,44 @@
 package my.chargingcontroller;
 
 /**
- *
- * @author This PC
+ * This the controller that controls all the GUI components with all the logic except
+ * the charging logic
+ * The actual charging logic is still held by the MainController
+ * @author Siyuan Wang
  */
 public class GUIController extends Thread{
     
+    /**
+     * GUIController should only hold one copy of ChargingMonitor, ParameterSetup,
+     * ParameterConfirm, PopupDialog, and ManualConfigure
+     */
     private ChargingMonitor chargingMonitor = null;
     private ParameterSetup parameterSetup = null;
     private ParameterConfirm parameterConfirm = null;
     private PopupDialog popupDialog = null;
     private ManualConfigure man = null;
     
+    /**
+     * The GUIController also hold a local copy of RealTimeData and ChargingParameters
+     * These two data set should be in sync with the ones held by the MainController
+     */
     private RealTimeData realTimeData;
     private ChargingParameters chargingParameters;
+    
+    //It holds a copy of the MainController.  This is its parent class
     private MainController mainController;
+    
+    //This is a boolean variable that will be used when a new set of parameter is submitted
     private boolean userRequestedCharge;
 
     
+    /**
+     * Default Constructor
+     * 
+     * @param _mainController
+     * @param _chargingParameters
+     * @param _realTimeData 
+     */
     public GUIController(   MainController _mainController, 
                             ChargingParameters _chargingParameters,
                             RealTimeData _realTimeData)
@@ -29,20 +50,26 @@ public class GUIController extends Thread{
         
     
         this.mainController = _mainController;
-        
         this.chargingParameters = _chargingParameters;
-
         this.realTimeData = _realTimeData;
+        
+        //user hasn't request charge yet
         this.userRequestedCharge = false;
     }
     
+    /**
+     * Create a ChargingMonitor Page
+     */
     public void createChargingMonitorPage()
     {
-        chargingMonitor = new ChargingMonitor(  this, realTimeData,
-                                                chargingParameters);
+        chargingMonitor = new ChargingMonitor(  this, realTimeData, chargingParameters);
         chargingMonitor.setVisible(true);
     }
     
+    
+    /**
+     * Create a Parameter Setup Page
+     */
     public void createParamSetupPage()
     {
         if(parameterSetup == null)
@@ -52,12 +79,20 @@ public class GUIController extends Thread{
         this.parameterSetup.setVisible(true);
     }
     
+    /**
+     * Create a Parameter Confirm Page
+     */
     public void createParamConfirmPage()
     {
         parameterConfirm = new ParameterConfirm(this,this.chargingParameters);
         this.parameterConfirm.setVisible(true);
     }
     
+    /**
+     * Create a Popup Dialog with a specified title and contents
+     * @param title The title that will be displayed in the Pop-up Dialog
+     * @param contents The contents that will be displayed in the Pop-up Dialog
+     */
     public void createdPopupDialog(String title, String contents)
     {
         if(popupDialog == null)
@@ -70,20 +105,31 @@ public class GUIController extends Thread{
         popupDialog.setVisible(true);
     }
     
+    /**
+     * Create the Manual Configuration Page
+     */
     public void createManualConfig()
     {
         man = new ManualConfigure(this.mainController);
         man.setVisible(true);
     }
     
+    /**
+     * This is the function that will be called when user requests charge by clicking
+     * on "Start Charging" button 
+     * 
+     * A Parameter Confirmation Page will be displayed
+     */
     public void userRequestedCharge()
     {
-        //this.mainController.userRequestedCharge();
         this.chargingMonitor.setVisible(false);
         this.userRequestedCharge = true;
         this.createParamConfirmPage();
     }
     
+    /**
+     * This is the function that will be called when user clicks on "stop" button
+     */
     public void userRequestedStop()
     {
         this.mainController.userRequestedStop();

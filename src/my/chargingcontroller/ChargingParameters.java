@@ -5,7 +5,7 @@
 package my.chargingcontroller;
 import java.util.*;
 /**
- *
+ * This is a wrapper class that wraps all the files
  * @author Siyuan Wang
  */
 public class ChargingParameters {
@@ -24,6 +24,7 @@ public class ChargingParameters {
     
     /**
      * Default Constructor
+     * 
      * @param _numOfCells
      * @param _vUpper
      * @param _iUpper
@@ -57,13 +58,11 @@ public class ChargingParameters {
     /**
      * Alternative Constructor
      */
-    public ChargingParameters()
-    {
-        
-    }
+    public ChargingParameters(){}
     
     /**
      * setter function to set all the values wrapped by this class
+     * 
      * @param _numOfCells
      * @param _vUpper
      * @param _iUpper
@@ -94,7 +93,9 @@ public class ChargingParameters {
         this.chargingTime = _chargingTime;
     }
     
-    //The following functions are all getters and setters for all of fields in this class
+    /**
+     * The following functions are all getters and setters for all of fields in this class
+     */
     
     public void setNumOfCells(int _numOfCells)
     {

@@ -1,52 +1,33 @@
 package my.chargingcontroller;
 import java.util.*;
+
 /**
- *
- * @author This PC
+ * This is the main GUI Component for monitoring charging
+ * @author Siyuan Wang
  */
 public class ChargingMonitor extends javax.swing.JFrame{
-    
-    /*
-    //parameters set by the user
-    public static int numOfCells = 1;
-    public static double vUpper = 5;
-    public static double iUpper = 600;
-    public static int tUpper = 255;
-    public static double bypassDuration = 0;
-    public static double bypassThreshold = 0;         
-    
-    //real-time variables
-    public static double[] currVoltage;
-    public static int[] currTemp;
-    public static boolean[] bypass;
-    public static double[][] diff;
-    public static int[] bypassTime;
-    public static double currCurrent;
-    public static boolean isCharging = false;
-    public static int state = 0;
-    public static boolean done = false;
-    public static boolean chargingRelayOpen = true;
-    public static int cycleTime = 0;
-    public static int tick = 0;
-    
-    public static GUIController guiController;
-    
-    public static final int IDLE = 0;
-    public static final int CHARGING = 1;
-
-    //public static final double CURRENT_UPPER_LIMIT = 100;
-    //public static final double CURRENT_LOWER_LIMIT = 0;
-    
-    public ManualConfigure manConfig = null;
-    public static int maxTemp;
-    */
-    
+ 
+    /**
+     * The charging monitor keeps a local copy of ChargingParameter and RealTimeData
+     * But these two should be in sync with the Charging Parameter and RealTimeData
+     * in the MainController
+     */
     private ChargingParameters chargingParameters;
     private RealTimeData realTimeData;
+    
+    //the instance of its parent class
     private GUIController guiController;
 
     /**
-     * Creates new form ChargingUI
+     * Constructor of ChargingMonitor
+     * 
+     * This will initiate components, assign instance variables from the parameters,
+     * center the window, and update the GUI based on the current ChargingParameter
+     * and RealTimeData
+     * 
+     * @param _guiController
+     * @param _realTimeData
+     * @param _chargingParameters 
      */
     public ChargingMonitor( GUIController _guiController,
                             RealTimeData _realTimeData,
@@ -1146,6 +1127,25 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.jRadioButtonMenuItem14.setSelected(true);
     }//GEN-LAST:event_jRadioButtonMenuItem16ActionPerformed
     
+    
+    /**
+     * This function will go through all the GUI updates
+     */
+    public void updateGUI()
+    {
+        updatePorts();
+        updateGUIParameterRanges();
+        updateGUIBasedOnCellNumber();
+        updateButtons();
+        updateProgressBarProgress();
+        updateState();     
+        updateProgressBarValue();
+        updateBypassStatusAndTime();
+    }
+    
+    /**
+     * update the GUI with the voltage, temperature and current ranges
+     */
     public void updateGUIParameterRanges()
     {
         this.jLabel22.setText("Cell Current(0-"+this.chargingParameters.getCurrentUpperLimit()+"A)");
@@ -1154,6 +1154,9 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.jLabel21.setText("Temperature(0-"+this.chargingParameters.getTemperatureUpperLimit()+" Celsius)");
     }
     
+    /**
+     * Update any GUI component that is dependent on the number of cells
+     */
     public void updateGUIBasedOnCellNumber()
     {
         int numOfCells = this.chargingParameters.getNumOfCells();
@@ -1284,24 +1287,18 @@ public class ChargingMonitor extends javax.swing.JFrame{
         }
     }    
     
-    public void updateGUI()
-    {
-        updatePorts();
-        updateGUIParameterRanges();
-        updateGUIBasedOnCellNumber();
-        updateButtons();
-        updateProgressBarProgress();
-        updateState();     
-        updateProgressBarValue();
-        updateBypassStatusAndTime();
-    }
-    
+    /**
+     * Update the port number listed in the "Tools" menu
+     */
     public void updatePorts()
     {
         this.jMenuItem1.setText(this.chargingParameters.getPortToBMS());
         this.jMenuItem7.setText(this.chargingParameters.getPortToArduino());
     }
     
+    /** 
+     * Update the only two buttons in the screen
+     */
     public void updateButtons()
     {
         //fade and enable appropriate button for different charging state
@@ -1316,6 +1313,9 @@ public class ChargingMonitor extends javax.swing.JFrame{
         }
     }
     
+    /**
+     * Update all the progress bar with current progress
+     */
     public void updateProgressBarProgress()
     {
        //update the progress bars for all the new voltage readings
@@ -1342,6 +1342,9 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jProgressBar18.setValue((int)(100*realTimeData.getMaxTemp()/chargingParameters.getTemperatureUpperLimit())); 
     }
     
+    /**
+     * Update the system state label with the current system state
+     */
     public void updateState()
     {
        if(realTimeData.getDone())
@@ -1362,6 +1365,9 @@ public class ChargingMonitor extends javax.swing.JFrame{
         } 
     }
     
+    /**
+     * Update all the values displayed on the progress bars
+     */
     public void updateProgressBarValue()
     {
         this.jProgressBar1.setString(String.valueOf(this.realTimeData.getVoltage(0))+"V");
@@ -1384,6 +1390,11 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.jProgressBar18.setString(String.valueOf(this.realTimeData.getMaxTemp())+" Celsius");
     }
     
+    /**
+     * get the bypass time and convert them to be strings that can be displayed
+     * @param index the index from cells
+     * @return 
+     */
     public String getBypassTimeInString(int index)
     {
         String timeToReturn = "";
@@ -1397,6 +1408,10 @@ public class ChargingMonitor extends javax.swing.JFrame{
         return timeToReturn;
     }
     
+    /**
+     * get all the bypass status and time for all cells and update the corresponding
+     * GUI components
+     */
     public void updateBypassStatusAndTime()
     {
         if(this.realTimeData.getBypassInfo(0))
@@ -1512,20 +1527,37 @@ public class ChargingMonitor extends javax.swing.JFrame{
         }
     }
     
+    /**
+     * setter for RealTimeData
+     * @param _realTimeData 
+     */
     public void setRealTimeData(RealTimeData _realTimeData)
     {
         this.realTimeData = _realTimeData;
     }
     
+    /**
+     * setter for ChargingParameter
+     * @param _chargingParameters 
+     */
     public void setChargingParameters(ChargingParameters _chargingParameters)
     {
         this.chargingParameters = _chargingParameters;
     }
+    
+    /**
+     * getter for RealTimeData
+     * @return 
+     */
     public RealTimeData getRealTimeData()
     {
         return this.realTimeData;
     }
     
+    /**
+     * getter for ChargingParameters
+     * @return 
+     */
     public ChargingParameters getChargingParameters()
     {
         return this.chargingParameters;
