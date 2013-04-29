@@ -253,6 +253,10 @@ public class GUIController extends Thread{
         this.chargingParameters = _chargingParameters;
     }
     
+    public void setBypassSwitch(int index, boolean isOn)
+    {
+        this.mainController.setBypass(index, isOn);
+    }
     
     public void run()
     {

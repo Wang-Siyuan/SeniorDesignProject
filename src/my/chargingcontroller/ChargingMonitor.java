@@ -130,15 +130,41 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jLabel34 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItem8 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenu6 = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem9 = new javax.swing.JMenuItem();
+        jMenuItem8 = new javax.swing.JMenuItem();
         jMenu7 = new javax.swing.JMenu();
         jMenu8 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu9 = new javax.swing.JMenu();
         jMenuItem7 = new javax.swing.JMenuItem();
+        jMenu11 = new javax.swing.JMenu();
+        jMenu12 = new javax.swing.JMenu();
+        jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
+        jMenu13 = new javax.swing.JMenu();
+        jRadioButtonMenuItem3 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem4 = new javax.swing.JRadioButtonMenuItem();
+        jMenu14 = new javax.swing.JMenu();
+        jRadioButtonMenuItem5 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem6 = new javax.swing.JRadioButtonMenuItem();
+        jMenu15 = new javax.swing.JMenu();
+        jRadioButtonMenuItem7 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem8 = new javax.swing.JRadioButtonMenuItem();
+        jMenu16 = new javax.swing.JMenu();
+        jRadioButtonMenuItem9 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem10 = new javax.swing.JRadioButtonMenuItem();
+        jMenu17 = new javax.swing.JMenu();
+        jRadioButtonMenuItem11 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem12 = new javax.swing.JRadioButtonMenuItem();
+        jMenu18 = new javax.swing.JMenu();
+        jRadioButtonMenuItem13 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem14 = new javax.swing.JRadioButtonMenuItem();
+        jMenu19 = new javax.swing.JMenu();
+        jRadioButtonMenuItem15 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem16 = new javax.swing.JRadioButtonMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
@@ -698,14 +724,6 @@ public class ChargingMonitor extends javax.swing.JFrame{
 
         jMenu1.setText("File");
 
-        jMenuItem8.setText("Open Manual Update Window");
-        jMenuItem8.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem8ActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItem8);
-
         jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem2.setText("Quit");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
@@ -717,7 +735,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
 
         jMenuBar1.add(jMenu1);
 
-        jMenu6.setText("Parameter");
+        jMenu6.setText("Configurations");
 
         jMenuItem5.setText("Set Parameters");
         jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
@@ -726,6 +744,17 @@ public class ChargingMonitor extends javax.swing.JFrame{
             }
         });
         jMenu6.add(jMenuItem5);
+
+        jMenuItem9.setText("Advanced Configuration");
+        jMenu6.add(jMenuItem9);
+
+        jMenuItem8.setText("Manual Update");
+        jMenuItem8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem8ActionPerformed(evt);
+            }
+        });
+        jMenu6.add(jMenuItem8);
 
         jMenuBar1.add(jMenu6);
 
@@ -744,6 +773,178 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jMenu9.add(jMenuItem7);
 
         jMenu7.add(jMenu9);
+
+        jMenu11.setText("Set Bypass");
+
+        jMenu12.setText("0x02");
+
+        jRadioButtonMenuItem1.setText("on");
+        jRadioButtonMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu12.add(jRadioButtonMenuItem1);
+
+        jRadioButtonMenuItem2.setSelected(true);
+        jRadioButtonMenuItem2.setText("off");
+        jRadioButtonMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu12.add(jRadioButtonMenuItem2);
+
+        jMenu11.add(jMenu12);
+
+        jMenu13.setText("0x04");
+
+        jRadioButtonMenuItem3.setText("on");
+        jRadioButtonMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu13.add(jRadioButtonMenuItem3);
+
+        jRadioButtonMenuItem4.setSelected(true);
+        jRadioButtonMenuItem4.setText("off");
+        jRadioButtonMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem4ActionPerformed(evt);
+            }
+        });
+        jMenu13.add(jRadioButtonMenuItem4);
+
+        jMenu11.add(jMenu13);
+
+        jMenu14.setText("0x06");
+
+        jRadioButtonMenuItem5.setText("on");
+        jRadioButtonMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu14.add(jRadioButtonMenuItem5);
+
+        jRadioButtonMenuItem6.setSelected(true);
+        jRadioButtonMenuItem6.setText("off");
+        jRadioButtonMenuItem6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem6ActionPerformed(evt);
+            }
+        });
+        jMenu14.add(jRadioButtonMenuItem6);
+
+        jMenu11.add(jMenu14);
+
+        jMenu15.setText("0x08");
+
+        jRadioButtonMenuItem7.setText("on");
+        jRadioButtonMenuItem7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem7ActionPerformed(evt);
+            }
+        });
+        jMenu15.add(jRadioButtonMenuItem7);
+
+        jRadioButtonMenuItem8.setSelected(true);
+        jRadioButtonMenuItem8.setText("off");
+        jRadioButtonMenuItem8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem8ActionPerformed(evt);
+            }
+        });
+        jMenu15.add(jRadioButtonMenuItem8);
+
+        jMenu11.add(jMenu15);
+
+        jMenu16.setText("0x0a");
+
+        jRadioButtonMenuItem9.setText("on");
+        jRadioButtonMenuItem9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem9ActionPerformed(evt);
+            }
+        });
+        jMenu16.add(jRadioButtonMenuItem9);
+
+        jRadioButtonMenuItem10.setSelected(true);
+        jRadioButtonMenuItem10.setText("off");
+        jRadioButtonMenuItem10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem10ActionPerformed(evt);
+            }
+        });
+        jMenu16.add(jRadioButtonMenuItem10);
+
+        jMenu11.add(jMenu16);
+
+        jMenu17.setText("0x0c");
+
+        jRadioButtonMenuItem11.setText("on");
+        jRadioButtonMenuItem11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem11ActionPerformed(evt);
+            }
+        });
+        jMenu17.add(jRadioButtonMenuItem11);
+
+        jRadioButtonMenuItem12.setSelected(true);
+        jRadioButtonMenuItem12.setText("off");
+        jRadioButtonMenuItem12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem12ActionPerformed(evt);
+            }
+        });
+        jMenu17.add(jRadioButtonMenuItem12);
+
+        jMenu11.add(jMenu17);
+
+        jMenu18.setText("0x0e");
+
+        jRadioButtonMenuItem13.setText("on");
+        jRadioButtonMenuItem13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem13ActionPerformed(evt);
+            }
+        });
+        jMenu18.add(jRadioButtonMenuItem13);
+
+        jRadioButtonMenuItem14.setSelected(true);
+        jRadioButtonMenuItem14.setText("off");
+        jRadioButtonMenuItem14.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem14ActionPerformed(evt);
+            }
+        });
+        jMenu18.add(jRadioButtonMenuItem14);
+
+        jMenu11.add(jMenu18);
+
+        jMenu19.setText("0x10");
+
+        jRadioButtonMenuItem15.setText("on");
+        jRadioButtonMenuItem15.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem15ActionPerformed(evt);
+            }
+        });
+        jMenu19.add(jRadioButtonMenuItem15);
+
+        jRadioButtonMenuItem16.setSelected(true);
+        jRadioButtonMenuItem16.setText("off");
+        jRadioButtonMenuItem16.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem16ActionPerformed(evt);
+            }
+        });
+        jMenu19.add(jRadioButtonMenuItem16);
+
+        jMenu11.add(jMenu19);
+
+        jMenu7.add(jMenu11);
 
         jMenuBar1.add(jMenu7);
 
@@ -848,6 +1049,102 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
         this.guiController.userRequestedSetParameters();
     }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jRadioButtonMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem1ActionPerformed
+        this.guiController.setBypassSwitch(1, true);
+        this.jRadioButtonMenuItem1.setSelected(true);
+        this.jRadioButtonMenuItem2.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem1ActionPerformed
+
+    private void jRadioButtonMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem2ActionPerformed
+        this.guiController.setBypassSwitch(1, false);
+        this.jRadioButtonMenuItem1.setSelected(false);
+        this.jRadioButtonMenuItem2.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem2ActionPerformed
+
+    private void jRadioButtonMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem3ActionPerformed
+        this.guiController.setBypassSwitch(2, true);
+        this.jRadioButtonMenuItem3.setSelected(true);
+        this.jRadioButtonMenuItem4.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem3ActionPerformed
+
+    private void jRadioButtonMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem4ActionPerformed
+        this.guiController.setBypassSwitch(2, false);
+        this.jRadioButtonMenuItem3.setSelected(false);
+        this.jRadioButtonMenuItem4.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem4ActionPerformed
+
+    private void jRadioButtonMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem5ActionPerformed
+        this.guiController.setBypassSwitch(3, true);
+        this.jRadioButtonMenuItem5.setSelected(true);
+        this.jRadioButtonMenuItem6.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem5ActionPerformed
+
+    private void jRadioButtonMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem6ActionPerformed
+        this.guiController.setBypassSwitch(3, false);
+        this.jRadioButtonMenuItem5.setSelected(false);
+        this.jRadioButtonMenuItem6.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem6ActionPerformed
+
+    private void jRadioButtonMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem7ActionPerformed
+        this.guiController.setBypassSwitch(4, true);
+        this.jRadioButtonMenuItem7.setSelected(true);
+        this.jRadioButtonMenuItem8.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem7ActionPerformed
+
+    private void jRadioButtonMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem8ActionPerformed
+        this.guiController.setBypassSwitch(4, false);
+        this.jRadioButtonMenuItem7.setSelected(false);
+        this.jRadioButtonMenuItem8.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem8ActionPerformed
+
+    private void jRadioButtonMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem9ActionPerformed
+        this.guiController.setBypassSwitch(5, true);
+        this.jRadioButtonMenuItem9.setSelected(true);
+        this.jRadioButtonMenuItem10.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem9ActionPerformed
+
+    private void jRadioButtonMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem10ActionPerformed
+        this.guiController.setBypassSwitch(5, false);
+        this.jRadioButtonMenuItem9.setSelected(false);
+        this.jRadioButtonMenuItem10.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem10ActionPerformed
+
+    private void jRadioButtonMenuItem11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem11ActionPerformed
+        this.guiController.setBypassSwitch(6, true);
+        this.jRadioButtonMenuItem11.setSelected(true);
+        this.jRadioButtonMenuItem12.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem11ActionPerformed
+
+    private void jRadioButtonMenuItem12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem12ActionPerformed
+        this.guiController.setBypassSwitch(6, false);
+        this.jRadioButtonMenuItem11.setSelected(false);
+        this.jRadioButtonMenuItem12.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem12ActionPerformed
+
+    private void jRadioButtonMenuItem13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem13ActionPerformed
+        this.guiController.setBypassSwitch(7, true);
+        this.jRadioButtonMenuItem13.setSelected(true);
+        this.jRadioButtonMenuItem14.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem13ActionPerformed
+
+    private void jRadioButtonMenuItem14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem14ActionPerformed
+        this.guiController.setBypassSwitch(7, false);
+        this.jRadioButtonMenuItem13.setSelected(false);
+        this.jRadioButtonMenuItem14.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem14ActionPerformed
+
+    private void jRadioButtonMenuItem15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem15ActionPerformed
+        this.guiController.setBypassSwitch(8, true);
+        this.jRadioButtonMenuItem15.setSelected(true);
+        this.jRadioButtonMenuItem16.setSelected(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem15ActionPerformed
+
+    private void jRadioButtonMenuItem16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem16ActionPerformed
+        this.guiController.setBypassSwitch(8, false);
+        this.jRadioButtonMenuItem13.setSelected(false);
+        this.jRadioButtonMenuItem14.setSelected(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem16ActionPerformed
     
     public void updateGUIParameterRanges()
     {
@@ -867,6 +1164,15 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar16.setVisible(false);
             this.jLabel8.setVisible(false);
             this.jLabel34.setVisible(false);
+            this.jMenu19.setVisible(false);
+        }else
+        {
+            this.jLabel18.setVisible(true);
+            this.jProgressBar8.setVisible(true);
+            this.jProgressBar16.setVisible(true);
+            this.jLabel8.setVisible(true);
+            this.jLabel34.setVisible(true);
+            this.jMenu19.setVisible(true);
         }
         
         if(numOfCells <7)
@@ -876,7 +1182,17 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar15.setVisible(false);
             this.jLabel7.setVisible(false);
             this.jLabel33.setVisible(false);
+            this.jMenu18.setVisible(false);
+        }else
+        {
+            this.jLabel17.setVisible(true);
+            this.jProgressBar7.setVisible(true);
+            this.jProgressBar15.setVisible(true);
+            this.jLabel7.setVisible(true);
+            this.jLabel33.setVisible(true);
+            this.jMenu18.setVisible(true);
         }
+        
         if(numOfCells < 6)
         {
             this.jLabel16.setVisible(false);
@@ -884,7 +1200,17 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar14.setVisible(false);
             this.jLabel6.setVisible(false);
             this.jLabel32.setVisible(false);
+            this.jMenu17.setVisible(false);
+        }else
+        {
+           this.jLabel16.setVisible(true);
+            this.jProgressBar6.setVisible(true);
+            this.jProgressBar14.setVisible(true);
+            this.jLabel6.setVisible(true);
+            this.jLabel32.setVisible(true);
+            this.jMenu17.setVisible(true); 
         }
+        
         if(numOfCells < 5)
         {
             this.jLabel15.setVisible(false);
@@ -892,7 +1218,17 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar13.setVisible(false);
             this.jLabel5.setVisible(false);
             this.jLabel31.setVisible(false);
+            this.jMenu16.setVisible(false);
+        }else
+        {
+            this.jLabel15.setVisible(true);
+            this.jProgressBar5.setVisible(true);
+            this.jProgressBar13.setVisible(true);
+            this.jLabel5.setVisible(true);
+            this.jLabel31.setVisible(true);
+            this.jMenu16.setVisible(true);
         }
+        
         if(numOfCells < 4)
         {
             this.jLabel14.setVisible(false);
@@ -900,7 +1236,17 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar12.setVisible(false);
             this.jLabel4.setVisible(false);
             this.jLabel30.setVisible(false);
+            this.jMenu15.setVisible(false);
+        }else
+        {
+            this.jLabel14.setVisible(true);
+            this.jProgressBar4.setVisible(true);
+            this.jProgressBar12.setVisible(true);
+            this.jLabel4.setVisible(true);
+            this.jLabel30.setVisible(true);
+            this.jMenu15.setVisible(true);
         }
+        
         if(numOfCells < 3)
         {
             this.jLabel13.setVisible(false);
@@ -908,7 +1254,17 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar11.setVisible(false);
             this.jLabel3.setVisible(false);
             this.jLabel29.setVisible(false);
+            this.jMenu14.setVisible(false);
+        }else
+        {
+            this.jLabel13.setVisible(true);
+            this.jProgressBar3.setVisible(true);
+            this.jProgressBar11.setVisible(true);
+            this.jLabel3.setVisible(true);
+            this.jLabel29.setVisible(true);
+            this.jMenu14.setVisible(true);
         }
+        
         if(numOfCells < 2)
         {
             this.jLabel12.setVisible(false);
@@ -916,6 +1272,15 @@ public class ChargingMonitor extends javax.swing.JFrame{
             this.jProgressBar10.setVisible(false);
             this.jLabel2.setVisible(false);
             this.jLabel28.setVisible(false);
+            this.jMenu13.setVisible(false);
+        }else
+        {
+            this.jLabel12.setVisible(true);
+            this.jProgressBar2.setVisible(true);
+            this.jProgressBar10.setVisible(true);
+            this.jLabel2.setVisible(true);
+            this.jLabel28.setVisible(true);
+            this.jMenu13.setVisible(true);
         }
     }    
     
@@ -1038,79 +1403,112 @@ public class ChargingMonitor extends javax.swing.JFrame{
         {
             this.jLabel1.setText("Bypassed");
             this.jLabel27.setText(""+this.getBypassTimeInString(0));
+            this.jRadioButtonMenuItem1.setSelected(true);
+            this.jRadioButtonMenuItem2.setSelected(false);
         }else
         {
             this.jLabel1.setText("Not Bypassed");
             this.jLabel27.setText("N/A");
+            this.jRadioButtonMenuItem1.setSelected(false);
+            this.jRadioButtonMenuItem2.setSelected(true);
         }
         
         if(this.realTimeData.getBypassInfo(1))
         {
             this.jLabel2.setText("Bypassed");
             this.jLabel28.setText(""+this.getBypassTimeInString(1));
+            this.jRadioButtonMenuItem3.setSelected(true);
+            this.jRadioButtonMenuItem4.setSelected(false);
         }else
         {
             this.jLabel2.setText("Not Bypassed");
             this.jLabel28.setText("N/A");
+            this.jRadioButtonMenuItem3.setSelected(false);
+            this.jRadioButtonMenuItem4.setSelected(true);
         }
         
         if(this.realTimeData.getBypassInfo(2))
         {
             this.jLabel3.setText("Bypassed");
             this.jLabel29.setText(""+this.getBypassTimeInString(2));
+            this.jRadioButtonMenuItem5.setSelected(true);
+            this.jRadioButtonMenuItem6.setSelected(false);
         }else
         {
             this.jLabel3.setText("Not Bypassed");
             this.jLabel29.setText("N/A");
+            this.jRadioButtonMenuItem5.setSelected(false);
+            this.jRadioButtonMenuItem6.setSelected(true);
         }
         
         if(this.realTimeData.getBypassInfo(3))
         {
             this.jLabel4.setText("Bypassed");
             this.jLabel30.setText(""+this.getBypassTimeInString(3));
+            this.jRadioButtonMenuItem7.setSelected(true);
+            this.jRadioButtonMenuItem8.setSelected(false);
         }else
         {
             this.jLabel4.setText("Not Bypassed");
             this.jLabel30.setText("N/A");
+            this.jRadioButtonMenuItem7.setSelected(false);
+            this.jRadioButtonMenuItem8.setSelected(true);
         }
         
         if(this.realTimeData.getBypassInfo(4))
         {
             this.jLabel5.setText("Bypassed");
             this.jLabel31.setText(""+this.getBypassTimeInString(4));
+            this.jRadioButtonMenuItem9.setSelected(true);
+            this.jRadioButtonMenuItem10.setSelected(false);
         }else
         {
             this.jLabel5.setText("Not Bypassed");
             this.jLabel31.setText("N/A");
+            this.jRadioButtonMenuItem9.setSelected(false);
+            this.jRadioButtonMenuItem10.setSelected(true);
         }
+        
         if(this.realTimeData.getBypassInfo(5))
         {
             this.jLabel6.setText("Bypassed");
             this.jLabel32.setText(""+this.getBypassTimeInString(5));
+            this.jRadioButtonMenuItem11.setSelected(true);
+            this.jRadioButtonMenuItem12.setSelected(false);
         }else
         {
             this.jLabel6.setText("Not Bypassed");
             this.jLabel32.setText("N/A");
+            this.jRadioButtonMenuItem11.setSelected(false);
+            this.jRadioButtonMenuItem12.setSelected(true);
         }
         
         if(this.realTimeData.getBypassInfo(6))
         {
             this.jLabel7.setText("Bypassed");
             this.jLabel33.setText(""+this.getBypassTimeInString(6));
+            this.jRadioButtonMenuItem13.setSelected(true);
+            this.jRadioButtonMenuItem14.setSelected(false);
         }else
         {
             this.jLabel7.setText("Not Bypassed");
             this.jLabel33.setText("N/A");
+            this.jRadioButtonMenuItem13.setSelected(false);
+            this.jRadioButtonMenuItem14.setSelected(true);
         }
         
         if(this.realTimeData.getBypassInfo(7))
         {
             this.jLabel8.setText("Bypassed");
             this.jLabel34.setText(""+this.getBypassTimeInString(7));
+            this.jRadioButtonMenuItem15.setSelected(true);
+            this.jRadioButtonMenuItem16.setSelected(false);
         }else
         {
             this.jLabel8.setText("Not Bypassed");
             this.jLabel34.setText("N/A");
+            this.jRadioButtonMenuItem15.setSelected(false);
+            this.jRadioButtonMenuItem16.setSelected(true);
         }
     }
     
@@ -1204,6 +1602,15 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu11;
+    private javax.swing.JMenu jMenu12;
+    private javax.swing.JMenu jMenu13;
+    private javax.swing.JMenu jMenu14;
+    private javax.swing.JMenu jMenu15;
+    private javax.swing.JMenu jMenu16;
+    private javax.swing.JMenu jMenu17;
+    private javax.swing.JMenu jMenu18;
+    private javax.swing.JMenu jMenu19;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
@@ -1222,6 +1629,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
+    private javax.swing.JMenuItem jMenuItem9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JProgressBar jProgressBar1;
@@ -1242,5 +1650,21 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private javax.swing.JProgressBar jProgressBar7;
     private javax.swing.JProgressBar jProgressBar8;
     private javax.swing.JProgressBar jProgressBar9;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem10;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem11;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem12;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem13;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem14;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem15;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem16;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem4;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem5;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem6;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem7;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem8;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem9;
     // End of variables declaration//GEN-END:variables
 }

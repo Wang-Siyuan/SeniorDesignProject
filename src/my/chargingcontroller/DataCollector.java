@@ -408,9 +408,10 @@ public class DataCollector extends Thread{
                 int temp_result = (int)(actual_current*100);
                 actual_current = ((double)(temp_result))/100;
                 
+                System.out.println("String buffer is : " + this.stringBuffer);
                 //reset the buffer
                 this.stringBuffer = "";
-                
+                System.out.println("I go t a valid reading:" + actual_current + "*************************************************************");
                 return actual_current;
             }else
             {
@@ -729,10 +730,11 @@ public class DataCollector extends Thread{
                     //read the current
                     currentReading = this.getPackCurrent();
                     
-                    if( currentReading != 0 )
-                    {
+                    //if( currentReading != 0 )
+                    //{
                         this.realTimeData.setCurrent(currentReading);
-                    }
+                        System.out.println("I set currrent to be:" + currentReading + "***************************************");
+                    //}
                     
                     this.turnOffAllBypass();
                     

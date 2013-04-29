@@ -148,6 +148,10 @@ public class MainController extends Thread{
         this.chargingParameters = _chargingParameters;
     }
     
+    public void setBypass(int index, boolean isOn)
+    {
+        this.dataCollector.setBypassSwitch(index, isOn);
+    }
     
     
     public void run()
