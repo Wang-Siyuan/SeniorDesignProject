@@ -4,6 +4,7 @@
  */
 package my.chargingcontroller;
 import java.util.*;
+
 /**
  *
  * @author This PC
@@ -17,6 +18,7 @@ public class MainController extends Thread{
     private GUIController guiController = null;
     private DataCollector dataCollector = null;
     private long chargingStartTime = 0;
+    
     /**
      * Constructor of MainController
      */
@@ -138,8 +140,6 @@ public class MainController extends Thread{
     
     public void setRealTimeData(RealTimeData _realTimeData)
     {
-        //System.out.println("Real Time Data Updated in main controller");
-        //System.out.println(this.realTimeData.getVoltage(0));
         this.realTimeData = _realTimeData;
     }
     
@@ -328,8 +328,6 @@ public class MainController extends Thread{
     
     public boolean checkForBypass(int index)
     {
-        //System.out.println("checking for bypass"+cellNumber);
-        //System.out.println(currVoltage[cellNumber]);
         boolean bypassNeeded = false;
         for(int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
         {

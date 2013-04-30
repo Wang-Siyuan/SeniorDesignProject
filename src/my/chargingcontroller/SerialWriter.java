@@ -26,7 +26,6 @@ public class SerialWriter extends Thread{
         
         public void setOutputStream(OutputStream _out)
         {
-            System.out.println("set output stream");
             this.out = _out;
         }
         
@@ -47,9 +46,7 @@ public class SerialWriter extends Thread{
         {
             try
             {               
-                System.out.println("I'm about to write bytes to arduino*********************************");
                 this.out.write(data);
-                System.out.println("Finished writing******************************************************");
             }catch ( IOException e )
             {
                 e.printStackTrace();
@@ -65,21 +62,16 @@ public class SerialWriter extends Thread{
                     throw new InterruptedException();
                 }
                 
-                System.out.println("I'm about to write bytes to serial");
                 this.out.write('G');
                 this.out.write('3');
-                //System.out.println("Wrote two bytes to serial");
                 this.out.write('S');
                 for(int i = 0; i < data.length; i++)
                 {
-                    //System.out.println("Wrote one byte");
                     this.out.write(data[i]);
                 }
                 this.out.write('P');
-                System.out.println("Finished writing ");
             }catch( InterruptedException e)
             {
-                System.out.println("Interrupt occurred");
                 return;
             }
             catch ( IOException e )
@@ -90,8 +82,6 @@ public class SerialWriter extends Thread{
         
         public void run()
         {
-            System.out.println("SerialWriter Thread created");
-            System.out.println("about to write");
             try
             {      
                 this.out.write('d');
@@ -107,10 +97,7 @@ public class SerialWriter extends Thread{
                 this.out.write('0');
                 this.out.write('2');
                 this.out.write('P');
-                
 
-                
-                System.out.println("Finished Writing");
                 } catch ( IOException e )
                 {
                     return;
@@ -121,13 +108,11 @@ public class SerialWriter extends Thread{
         
         public void stopThread()
         {
-            System.out.println("Stop set to true");
             this.stop = true;
         }
         
         public void startThread()
         {
-            System.out.println("stop set to false");
             this.stop = false;
         }
 }

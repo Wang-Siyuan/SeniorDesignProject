@@ -27,9 +27,10 @@ public class DataCollector extends Thread{
     private static final String BMS_VALID_TEST = "0042";
     private static final String PATH_FOR_DATA_RECORDING = "..\\";
     private static final String PATH_FOR_ERROR_LOG = "..\\";
+    private static final String PATH_FOR_DATABASE_LOG = "..\\";
     private static final String FILE_NAME_FOR_DATA_RECORDING = "ChargingCharacteristics.txt";
     private static final String FILE_NAME_FOR_ERROR_LOG = "ErrorLog.txt";
-    
+    private static final String FILE_NAME_FOR_DATABASE_LOG = "DatabaseLog.xml";
     
     // The MainController is the DataCollecotor's parent in the control hierarchy
     private MainController mainController = null;
@@ -71,6 +72,9 @@ public class DataCollector extends Thread{
     private int writerIndexForBMS = 0;
     private int writerIndexForArduino = 0;
     
+    private boolean BMSfound = false;
+    private boolean ArduinoFound = false;
+    
     public DataCollector(MainController _mainController, RealTimeData _realTimeData, ChargingParameters _chargingParameters)
     {
         //assign data from parameters passed in
@@ -83,10 +87,6 @@ public class DataCollector extends Thread{
          * in the chargingParameters
          */
         this.lookForPorts();
-        
-        //initialize the SerialReader
-        this.sr = new SerialReader();
-        this.sr.start();
         
         //initialize the SerialWriters
         this.sw = new SerialWriter[8];        
@@ -120,8 +120,8 @@ public class DataCollector extends Thread{
     public boolean getPortNames() throws Exception
     {
         SerialPort serialPort = null;
-        boolean BMSfound = false;
-        boolean ArduinoFound = false;
+        BMSfound = false;
+        ArduinoFound = false;
         
         //Going through all the ports discovered before
         //You can view all available ports under device manager in a windows machine
@@ -139,13 +139,6 @@ public class DataCollector extends Thread{
             //set the input and output stream for the SerialReader and SerialWriter
             InputStream in = serialPort.getInputStream();
             OutputStream out = serialPort.getOutputStream();
-
-//            this.sr.setInputStream(in);
-//            this.sr.setDataCollector(this);
-//            if(this.sr.isStopped())
-//            {
-//                this.sr.startThread();
-//            }     
             
             SerialReader tempSR = new SerialReader(this, in);
             tempSR.start();
@@ -226,14 +219,24 @@ public class DataCollector extends Thread{
      */
     public void writeToFile(String content)
     {
+        boolean emptyFile = false;
         try {
-//            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+//          PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
             PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_DATA_RECORDING+FILE_NAME_FOR_DATA_RECORDING, true)));
+            BufferedReader br = new BufferedReader(new FileReader(PATH_FOR_DATA_RECORDING+FILE_NAME_FOR_DATA_RECORDING));
+            if(br.readLine() == null)
+            {
+                emptyFile = true;
+            }
+            br.close();
+            if(emptyFile)
+            {
+                out.println("System Time(s)\tVoltage\tTime in Readable Format");
+            }
             out.println(content);
             out.close();
         } catch (IOException e) {
-            System.out.println("Invalid path name for Charging Characteristic file");
-            System.exit(1);
+            this.writeToErrorFile("IO Exceptions occurred when trying to record cell characteristic data");
         }
     }
     
@@ -243,19 +246,58 @@ public class DataCollector extends Thread{
      */
     public void writeToErrorFile(String error)
     {
+        boolean emptyFile = false;
         try {
 //          PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
             PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_ERROR_LOG+FILE_NAME_FOR_ERROR_LOG, true)));
-
             out.print(error);
             Date date = new Date(System.currentTimeMillis());
-            out.println(date.toString());
+            out.println("\t\t"+date.toString());
             out.close();
-        } catch (IOException e) {
-            System.out.println("Invalid path name for Error file");
-            System.exit(1);
+        } catch (IOException ioe) {
+            while(true)
+            {
+                this.realTimeData.setErrorOccurred(true);
+                this.realTimeData.setErrorMessage("Cannot write to the Errorlog, please make sure you are not opening the ErrorLog file.");
+                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"\nYou can also delete the ErrorLog file from your local directory and restart the program");
+                this.mainController.setRealTimeData(this.realTimeData);
+                try{
+                    Thread.sleep(4000);
+                }catch (Exception e){
+                    //You can assume this exception won't happen
+                }
+            }
         }
     }
+    
+    /**
+     * Write message to the local error file to log the error
+     * @param error 
+     */
+    public void writeToDatabase(String content)
+    {
+        boolean emptyFile = false;
+        try {
+//          PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("C:\\Documents and Settings\\This PC\\My Documents\\ChargingCharacteristics.txt", true)));
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(PATH_FOR_DATABASE_LOG+FILE_NAME_FOR_DATABASE_LOG, true)));
+            BufferedReader br = new BufferedReader(new FileReader(PATH_FOR_DATABASE_LOG+FILE_NAME_FOR_DATABASE_LOG));
+            if(br.readLine() == null)
+            {
+                emptyFile = true;
+            }
+            br.close();
+            if(emptyFile)
+            {
+                out.println("<?xml version = \"1.0\" standalone = \"yes\" ?>");
+            }
+            out.println(content);
+            out.close();
+        } catch (IOException e) {
+            this.writeToErrorFile("IO Exceptions occurred when trying to write to database(xml) file");
+        }
+    }
+    
+    
     
     /**
      * This function is to serve the I2C communication.  It update the available
@@ -340,7 +382,6 @@ public class DataCollector extends Thread{
                 
                 //reset the string buffer to empty
                 this.stringBuffer = "";
-                System.out.println("Cell Voltage is: "+actual_voltage+ "*************************************************");
                 return actual_voltage;
             }else{
                 this.writeToErrorFile("Invalid data read from BMS when trying to get cell voltage");
@@ -439,11 +480,9 @@ public class DataCollector extends Thread{
                 actual_current = ((v_ref/gain)*(v_ic/(Math.pow(2,10) - 1)) + v_off)/resistance_bar;
                 int temp_result = (int)(actual_current*100);
                 actual_current = ((double)(temp_result))/100;
-                
-                System.out.println("String buffer is : " + this.stringBuffer);
+                                
                 //reset the buffer
                 this.stringBuffer = "";
-                System.out.println("I go t a valid reading:" + actual_current + "*************************************************************");
                 return actual_current;
             }else
             {
@@ -705,11 +744,10 @@ public class DataCollector extends Thread{
             Thread.sleep(2000);
             if(this.stringBuffer.equals(ARDUINO_CONFIRM_ONE)||this.stringBuffer.equals(ARDUINO_CONFIRM_TWO))
             {
-                System.out.println("Test Passed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-               return true;
+                return true;
             }else
             {
-                System.out.println("test didn't pass, I got this:"+ this.stringBuffer+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                this.writeToErrorFile("Cannot communicate with Arduino");
             }
         }catch(Exception e)
         {
@@ -819,16 +857,18 @@ public class DataCollector extends Thread{
                     this.realTimeData.setErrorMessage("");
                     this.realTimeData.setErrorOccurred(false);
                     
+                    this.writeToDatabase("<Pack>");
+                    
                     //always initialize this boolean variable to false
                     errorOccurred = false;
                     
                     //read the current
                     currentReading = this.getPackCurrent();
+                    this.realTimeData.setCurrent(currentReading);                    
                     
-                    this.realTimeData.setCurrent(currentReading);
-                    System.out.println("currrent is:" + currentReading + "***************************************");
-
                     this.turnOffAllBypass();
+                    
+                    this.writeToDatabase("\t<Cells>");
                     
                     //go through all possible cells
                     for(int i = 1; i <= 8; i++)
@@ -836,6 +876,8 @@ public class DataCollector extends Thread{
                         //test the cells one by one, only proceed to acquire data if the test passed
                         if(this.testCell(i))
                         {
+                            this.writeToDatabase("\t\t<Cell><CellNumber>"+i+"<\\CellNumber>");
+                            
                             //get the cell voltage
                             voltageReading = this.getCellVoltage(i);
                             if(  voltageReading != 0 )
@@ -846,16 +888,20 @@ public class DataCollector extends Thread{
                                 this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Voltage Value \n");
                             }
                             
+                            this.writeToDatabase("\t\t\t<Voltage>"+voltageReading+"<\\Voltage>");
+                            
                             //get the cell temperature
                             tempReading = this.getCellTemp(i);
                             if(  tempReading != 0 )
                             {
                                 this.realTimeData.setTemperature(i-1, tempReading);
-                                System.out.println(tempReading);
                             }else{
                                 errorOccurred = true;
                                 this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Temperature Value \n");
                             }
+                            
+                            this.writeToDatabase("\t\t\t<Temperature>"+tempReading+"<\\Temperature>");
+
                             
                             //get the bypass state
                             bypassState = this.getBypassState(i);
@@ -864,11 +910,16 @@ public class DataCollector extends Thread{
                             {
                                 this.realTimeData.setBypassInfo(i-1, true);
                                 
+                                long bypassTime = this.getBypassTime(i);
                                 //also retrieve the bypass time if it is bypassed
-                                this.realTimeData.setBypassTime(i-1, this.getBypassTime(i));
+                                this.realTimeData.setBypassTime(i-1, bypassTime);
+                                this.writeToDatabase("\t\t\t<Bypassed>true<\\Bypassed>");
+                                this.writeToDatabase("\t\t\t<BypassTime>"+bypassTime+"<\\BypassTime>");
                             }else if(bypassState == 0)
                             {
                                 this.realTimeData.setBypassInfo(i-1, false);
+                                this.writeToDatabase("\t\t\t<Bypassed>false<\\Bypassed>");
+                                this.writeToDatabase("\t\t\t<BypassTime>0<\\BypassTime>");
                             }else if( bypassState == -1 )
                             {
                                 errorOccurred = true;
@@ -887,8 +938,12 @@ public class DataCollector extends Thread{
                             this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"No Cell Detected.  Please check if one of the cells have address 0x02\n");
                             errorOccurred = true;
                         }
+                        this.writeToDatabase("\t\t<\\Cell>");
                     }
-                    
+                    this.writeToDatabase("<\\Cells>");
+                    this.writeToDatabase("<Current>"+currentReading+"<\\Current>");
+                    this.writeToDatabase("<NumberOfCells>"+this.chargingParameters.getNumOfCells()+"<\\NumberOfCells>");
+                    this.writeToDatabase("<\\Pack>");
                     if(initiatePingToArduino)
                     {
                         initiatePingToArduino = false;
@@ -921,7 +976,25 @@ public class DataCollector extends Thread{
                 }
             }else
             {
-                //This error should have already been logged
+                while(true)
+                {
+                    if(!BMSfound)
+                    {
+                        this.realTimeData.setErrorMessage("BMS board not found. Please close the program and restart it");
+                    }else if(!ArduinoFound)
+                    {
+                        this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Arduino board not found. Please close the program and restart it");
+                    }
+                    this.realTimeData.setErrorOccurred(true);
+                    this.mainController.setRealTimeData(this.realTimeData);
+                    
+                    try{
+                        Thread.sleep(4000);
+                    }catch(Exception e)
+                    {
+                        this.writeToErrorFile("Cannot set the DataCollector Thread to sleep");
+                    }
+                }
             }
         }catch(Exception e)
         {

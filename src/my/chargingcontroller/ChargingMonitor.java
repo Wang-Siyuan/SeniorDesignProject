@@ -1150,8 +1150,8 @@ public class ChargingMonitor extends javax.swing.JFrame{
     {
         this.jLabel22.setText("Cell Current(0-"+this.chargingParameters.getCurrentUpperLimit()+"A)");
         this.jLabel24.setText("Max Cell Temperature(0-"+this.chargingParameters.getTemperatureUpperLimit()+" Celsius)");
-        this.jLabel20.setText("Voltage(0-"+this.chargingParameters.getVoltageUpperLimit()+"V)");
-        this.jLabel21.setText("Temperature(0-"+this.chargingParameters.getTemperatureUpperLimit()+" Celsius)");
+        this.jLabel20.setText("Voltage(0-"+this.chargingParameters.getVoltageUpperLimit()+" V)");
+        this.jLabel21.setText("Temperature(0-"+this.chargingParameters.getTemperatureUpperLimit()+" C)");
     }
     
     /**

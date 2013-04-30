@@ -28,7 +28,6 @@ public class SerialReader extends Thread{
 
     public void setInputStream(InputStream _in)
     {
-        System.out.println("Input Stream changed!");
         this.in = _in;
     }
     
@@ -39,7 +38,6 @@ public class SerialReader extends Thread{
 
     public void run ()
     {
-        System.out.println("Serial Reader Thread created");
         byte[] buffer = new byte[1024];
         int len = -1;
         
@@ -60,7 +58,6 @@ public class SerialReader extends Thread{
                 String temp = null;
                 String newString = "";
                 int tempLength = 0;
-                System.out.println("About to read serially");
                     while (( len = this.in.read(buffer)) > -1)
                     {
                         temp = new String(buffer,0,len);
@@ -73,21 +70,15 @@ public class SerialReader extends Thread{
                                 tempLength = 0;
                                 newString = newString.substring(0, newString.length()-1);
                                 this.dataCollector.updateStringBuffer(newString);
-                                //System.out.println(newString);
                                 newString = "";
-                            }else{
-                                //System.out.println(temp);
                             }
                         }
                     }
-                
-                System.out.println("Finished reading");
             }
         }
         catch ( Exception e )
         {
             e.printStackTrace();
-            System.out.println("Exception");
         }            
     }
     

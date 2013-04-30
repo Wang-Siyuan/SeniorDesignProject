@@ -334,16 +334,6 @@ public class ParameterSetup extends javax.swing.JFrame {
         //Integer numOfCells = (Integer)this.jSpinner1.getValue();
 
         String eol = System.getProperty("line.separator");
-
-//        if(numOfCells<1 || numOfCells>8)
-//        {
-//            error = true;
-//            warningMsg += "Number of Cells has to be between 1 and 8"+ eol;
-//        }else
-//        {
-//            this.chargingParameters.setNumOfCells(numOfCells);
-//        }
-        //System.out.println("num of cells has been set to: "+this.myController.numOfCells);
         int chargingTime = Integer.parseInt(this.jTextField2.getText());
         
         if(chargingTime > 0)
@@ -448,7 +438,7 @@ public class ParameterSetup extends javax.swing.JFrame {
            {
                //System.out.println(path.substring(path.length()-4, path.length()));
            }
-           System.out.println("The Path is: " + path);
+//           System.out.println("The Path is: " + path);
            writeToFile(path);
       }
       if (rVal == jFileChooser1.CANCEL_OPTION) {
@@ -529,7 +519,7 @@ public class ParameterSetup extends javax.swing.JFrame {
     
     public void writeToFile(String path)
     {
-        System.out.println("write to file function called");
+        //System.out.println("write to file function called");
         try {
  
                 // content = this.jSpinner1.getValue() + System.getProperty( "line.separator" );
