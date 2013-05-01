@@ -21,6 +21,11 @@ public class ChargingParameters {
     private String portToBMS = null;
     private String portToArduino = null;
     private int chargingTime = 0;
+    private boolean isAutomaticMode = true;
+    private boolean withArduino = false;
+    private float[] voltageOffset;
+    private float[] temperatureOffset;
+    private float currentOffset;
     
     /**
      * Default Constructor
@@ -40,7 +45,8 @@ public class ChargingParameters {
                                 int _tUpper, int _bypassDuration,
                                 int _bypassThreshold, double _bypassCutoff, 
                                 ArrayList<String> _listOfPorts,
-                                String _portToBMS, String _portToArduino, int _chargingTime )
+                                String _portToBMS, String _portToArduino, int _chargingTime,
+                                float[] _voltageOffset, float[] _temperatureOffset, float _currentOffset )
     {
         this.numOfCells = _numOfCells;
         this.vUpper = _vUpper;
@@ -53,6 +59,11 @@ public class ChargingParameters {
         this.portToArduino = _portToArduino;
         this.portToBMS = _portToBMS;
         this.chargingTime = _chargingTime;
+        this.isAutomaticMode = true;
+        this.withArduino = false;
+        this.voltageOffset = _voltageOffset;
+        this.temperatureOffset = _temperatureOffset;
+        this.currentOffset = _currentOffset;
     }
     
     /**
@@ -206,4 +217,55 @@ public class ChargingParameters {
     {
         return this.chargingTime;
     }
+    
+    public void setIsAutomaticMode(boolean _isAutomaticMode)
+    {
+        this.isAutomaticMode = _isAutomaticMode;
+    }
+    
+    public boolean getIsAutomaticMode()
+    {
+        return this.isAutomaticMode;
+    }
+    
+    public void setWithArduino(boolean _withArduino)
+    {
+        this.withArduino = _withArduino;
+    }
+    
+    public boolean getWithArduino()
+    {
+        return this.withArduino;
+    }
+    
+    public float getVoltageOffset(int index)
+    {
+        return this.voltageOffset[index];
+    }
+    
+    public void setVoltageOffset(int index, float offset)
+    {
+        this.voltageOffset[index] = offset;
+    }
+    
+    public float getTemperatureOffset(int index)
+    {
+        return this.temperatureOffset[index];
+    }
+    
+    public void setTemperatureOffset(int index, float offset)
+    {
+        this.temperatureOffset[index] = offset;
+    }
+    
+    public float getCurrentOffset()
+    {
+        return this.currentOffset;
+    }
+    
+    public void setCurrentOffset(float offset)
+    {
+        this.currentOffset = offset;
+    }
+            
 }

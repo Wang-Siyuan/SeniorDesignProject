@@ -353,6 +353,7 @@ public class ParameterSetup extends javax.swing.JFrame {
         }else
         {
             this.chargingParameters.setVoltageUpperLimit(vUpper);
+            this.chargingParameters.setBypassCutoff(vUpper - 0.2);
         }
 
         int tempUpper = Integer.parseInt(this.jTextField3.getText());

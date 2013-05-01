@@ -36,6 +36,10 @@ public class MainController extends Thread{
         String portToPC = "";
         String portToArduino = "";
         int ChargingTime = 180;
+        float[] voltageOffsets = new float[8];
+        float[] temperatureOffsets = new float[8];
+        float currentOffset = 0;
+        
         defaultChargingParameters = new ChargingParameters(     numOfCells, 
                                                                 vUpper,
                                                                 iUpper, 
@@ -46,7 +50,10 @@ public class MainController extends Thread{
                                                                 listOfPorts,
                                                                 portToPC,
                                                                 portToArduino,
-                                                                ChargingTime );
+                                                                ChargingTime,
+                                                                voltageOffsets,
+                                                                temperatureOffsets,
+                                                                currentOffset);
         
         /* generate a set of default real time data */
         double[] vCurr = new double[8];
@@ -156,6 +163,10 @@ public class MainController extends Thread{
     
     public void run()
     {   
+        for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
+        {
+            this.dataCollector.setBypassSwitch(j, false);
+        }
         /* MainController thread will keep running until the program exits */
         while(true)
         {
@@ -240,7 +251,6 @@ public class MainController extends Thread{
                         {
                             this.dataCollector.setBypassSwitch(j, false);
                         }
-
                     }else if(this.checkForCellOverheating())
                     {
                         //tell the user at least one of the cells is overheating
@@ -269,8 +279,9 @@ public class MainController extends Thread{
                     {
                         for (int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
                         {
-                            if(this.checkForBypass(i))
+                            if(this.checkForBypass(i) && !this.realTimeData.getBypassInfo(i))
                             {
+                                System.out.println("One of them needs to be bypassed!");
                                 this.dataCollector.setBypassSwitch(i+1, true);
                             }
                         }

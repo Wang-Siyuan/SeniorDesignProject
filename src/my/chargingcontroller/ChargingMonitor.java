@@ -116,6 +116,13 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem9 = new javax.swing.JMenuItem();
         jMenuItem8 = new javax.swing.JMenuItem();
+        jMenu10 = new javax.swing.JMenu();
+        jMenu20 = new javax.swing.JMenu();
+        jRadioButtonMenuItem17 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem18 = new javax.swing.JRadioButtonMenuItem();
+        jMenu21 = new javax.swing.JMenu();
+        jRadioButtonMenuItem19 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem20 = new javax.swing.JRadioButtonMenuItem();
         jMenu7 = new javax.swing.JMenu();
         jMenu8 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -727,6 +734,11 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jMenu6.add(jMenuItem5);
 
         jMenuItem9.setText("Advanced Configuration");
+        jMenuItem9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem9ActionPerformed(evt);
+            }
+        });
         jMenu6.add(jMenuItem9);
 
         jMenuItem8.setText("Manual Update");
@@ -738,6 +750,52 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jMenu6.add(jMenuItem8);
 
         jMenuBar1.add(jMenu6);
+
+        jMenu10.setText("Mode");
+
+        jMenu20.setText("Data Collection");
+
+        jRadioButtonMenuItem17.setSelected(true);
+        jRadioButtonMenuItem17.setText("Automatic Mode");
+        jRadioButtonMenuItem17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem17ActionPerformed(evt);
+            }
+        });
+        jMenu20.add(jRadioButtonMenuItem17);
+
+        jRadioButtonMenuItem18.setText("Manual Mode");
+        jRadioButtonMenuItem18.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem18ActionPerformed(evt);
+            }
+        });
+        jMenu20.add(jRadioButtonMenuItem18);
+
+        jMenu10.add(jMenu20);
+
+        jMenu21.setText("Charging Mode");
+
+        jRadioButtonMenuItem19.setText("With Arduino Board");
+        jRadioButtonMenuItem19.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem19ActionPerformed(evt);
+            }
+        });
+        jMenu21.add(jRadioButtonMenuItem19);
+
+        jRadioButtonMenuItem20.setSelected(true);
+        jRadioButtonMenuItem20.setText("Without Arduino Board");
+        jRadioButtonMenuItem20.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem20ActionPerformed(evt);
+            }
+        });
+        jMenu21.add(jRadioButtonMenuItem20);
+
+        jMenu10.add(jMenu21);
+
+        jMenuBar1.add(jMenu10);
 
         jMenu7.setText("Tools");
 
@@ -755,7 +813,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
 
         jMenu7.add(jMenu9);
 
-        jMenu11.setText("Set Bypass with Board Address:");
+        jMenu11.setText("Set Bypass Switch on the BMS Board with Address:");
 
         jMenu12.setText("0x02");
 
@@ -1000,7 +1058,10 @@ public class ChargingMonitor extends javax.swing.JFrame{
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        this.guiController.userRequestedCharge();
+        if(this.chargingParameters.getWithArduino())
+        {
+            this.guiController.userRequestedCharge();
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -1126,6 +1187,38 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.jRadioButtonMenuItem13.setSelected(false);
         this.jRadioButtonMenuItem14.setSelected(true);
     }//GEN-LAST:event_jRadioButtonMenuItem16ActionPerformed
+
+    private void jRadioButtonMenuItem17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem17ActionPerformed
+        this.chargingParameters.setIsAutomaticMode(true);
+        this.jRadioButtonMenuItem17.setSelected(true);
+        this.jRadioButtonMenuItem18.setSelected(false);
+        this.guiController.setDataCollectorMode(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem17ActionPerformed
+
+    private void jRadioButtonMenuItem18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem18ActionPerformed
+        this.chargingParameters.setIsAutomaticMode(false);
+        this.jRadioButtonMenuItem17.setSelected(false);
+        this.jRadioButtonMenuItem18.setSelected(true);
+        this.guiController.setDataCollectorMode(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem18ActionPerformed
+
+    private void jRadioButtonMenuItem19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem19ActionPerformed
+        this.chargingParameters.setWithArduino(true);
+        this.jRadioButtonMenuItem19.setSelected(true);
+        this.jRadioButtonMenuItem20.setSelected(false);
+        this.guiController.setArduinoMode(true);
+    }//GEN-LAST:event_jRadioButtonMenuItem19ActionPerformed
+
+    private void jRadioButtonMenuItem20ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem20ActionPerformed
+        this.chargingParameters.setWithArduino(false);
+        this.jRadioButtonMenuItem19.setSelected(false);
+        this.jRadioButtonMenuItem20.setSelected(true);
+        this.guiController.setArduinoMode(false);
+    }//GEN-LAST:event_jRadioButtonMenuItem20ActionPerformed
+
+    private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed
+        this.guiController.userRequestedAdvancedConfig();
+    }//GEN-LAST:event_jMenuItem9ActionPerformed
     
     
     /**
@@ -1141,6 +1234,30 @@ public class ChargingMonitor extends javax.swing.JFrame{
         updateState();     
         updateProgressBarValue();
         updateBypassStatusAndTime();
+        updateMode();
+    }
+    
+    public void updateMode()
+    {
+        if(this.chargingParameters.getWithArduino())
+        {
+            this.jRadioButtonMenuItem19.setSelected(true);
+            this.jRadioButtonMenuItem20.setSelected(false);
+        }else
+        {
+            this.jRadioButtonMenuItem19.setSelected(false);
+            this.jRadioButtonMenuItem20.setSelected(true);
+        }
+        
+        if(this.chargingParameters.getIsAutomaticMode())
+        {
+            this.jRadioButtonMenuItem17.setSelected(true);
+            this.jRadioButtonMenuItem18.setSelected(false);
+        }else
+        {
+           this.jRadioButtonMenuItem17.setSelected(false);
+            this.jRadioButtonMenuItem18.setSelected(true); 
+        }
     }
     
     /**
@@ -1634,6 +1751,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu10;
     private javax.swing.JMenu jMenu11;
     private javax.swing.JMenu jMenu12;
     private javax.swing.JMenu jMenu13;
@@ -1644,6 +1762,8 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private javax.swing.JMenu jMenu18;
     private javax.swing.JMenu jMenu19;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu20;
+    private javax.swing.JMenu jMenu21;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
@@ -1690,7 +1810,11 @@ public class ChargingMonitor extends javax.swing.JFrame{
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem14;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem15;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem16;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem17;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem18;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem19;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem20;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem4;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem5;

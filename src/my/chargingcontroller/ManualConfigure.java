@@ -20,10 +20,10 @@ public class ManualConfigure extends javax.swing.JFrame {
         initComponents();
         this.mainController = _mainController;
         this.realTimeData = mainController.getRealTimeData();
+        this.chargingParameters = this.mainController.getChargingParameters();
         this.initializeValues();
         this.setLocation((int)(this.getGraphicsConfiguration().getBounds().getWidth()-this.getWidth())/2,(int)(this.getGraphicsConfiguration().getBounds().getHeight()-this.getHeight())/2); 
         this.updateGUIBasedOnNumOfCells(this.mainController.getChargingParameters().getNumOfCells());
-        this.chargingParameters = this.mainController.getChargingParameters();
     }
     
     public void initializeValues()
@@ -45,6 +45,7 @@ public class ManualConfigure extends javax.swing.JFrame {
         this.jSpinner16.setValue(this.realTimeData.getTemperature(6));
         this.jSpinner17.setValue(this.realTimeData.getTemperature(7));
         this.jSpinner8.setValue(this.realTimeData.getCurrent());
+        this.jSpinner18.setValue(this.chargingParameters.getNumOfCells());
     }
     
     public void updateGUIBasedOnNumOfCells(int numOfCells)
@@ -54,6 +55,11 @@ public class ManualConfigure extends javax.swing.JFrame {
             this.jSpinner9.setVisible(false);
             this.jSpinner17.setVisible(false);
             this.jLabel9.setVisible(false);
+        }else
+        {
+            this.jSpinner9.setVisible(true);
+            this.jSpinner17.setVisible(true);
+            this.jLabel9.setVisible(true);
         }
         
         if(numOfCells <7)
@@ -61,37 +67,73 @@ public class ManualConfigure extends javax.swing.JFrame {
             this.jSpinner7.setVisible(false);
             this.jSpinner16.setVisible(false);
             this.jLabel8.setVisible(false);
+        }else
+        {
+            this.jSpinner7.setVisible(true);
+            this.jSpinner16.setVisible(true);
+            this.jLabel8.setVisible(true);
         }
+        
         if(numOfCells < 6)
         {
             this.jSpinner6.setVisible(false);
             this.jSpinner15.setVisible(false);
             this.jLabel7.setVisible(false);
+        }else
+        {
+            this.jSpinner6.setVisible(true);
+            this.jSpinner15.setVisible(true);
+            this.jLabel7.setVisible(true);
         }
+        
         if(numOfCells < 5)
         {
             this.jSpinner5.setVisible(false);
             this.jSpinner14.setVisible(false);
             this.jLabel6.setVisible(false);
+        }else
+        {
+            this.jSpinner5.setVisible(true);
+            this.jSpinner14.setVisible(true);
+            this.jLabel6.setVisible(true);
         }
+        
         if(numOfCells < 4)
         {
             this.jSpinner4.setVisible(false);
             this.jSpinner13.setVisible(false);
             this.jLabel5.setVisible(false);
+        }else
+        {
+            this.jSpinner4.setVisible(true);
+            this.jSpinner13.setVisible(true);
+            this.jLabel5.setVisible(true);
         }
+        
         if(numOfCells < 3)
         {
             this.jSpinner3.setVisible(false);
             this.jSpinner12.setVisible(false);
             this.jLabel4.setVisible(false);
+        }else
+        {
+            this.jSpinner3.setVisible(true);
+            this.jSpinner12.setVisible(true);
+            this.jLabel4.setVisible(true);
         }
+        
         if(numOfCells < 2)
         {
             this.jSpinner2.setVisible(false);
             this.jSpinner11.setVisible(false);
             this.jLabel3.setVisible(false);
+        }else
+        {
+            this.jSpinner2.setVisible(true);
+            this.jSpinner11.setVisible(true);
+            this.jLabel3.setVisible(true);
         }
+        
     }
     
     public void updateRealTimeData()
@@ -115,6 +157,7 @@ public class ManualConfigure extends javax.swing.JFrame {
         this.realTimeData.setTemperature(6,(int)this.jSpinner16.getValue());
         this.realTimeData.setTemperature(7,(int)this.jSpinner17.getValue());
         this.realTimeData.setCurrent((double)this.jSpinner8.getValue());
+        this.chargingParameters.setNumOfCells((int)this.jSpinner18.getValue());
 
     }
 
@@ -158,6 +201,8 @@ public class ManualConfigure extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jLabel12 = new javax.swing.JLabel();
         jSpinner8 = new javax.swing.JSpinner();
+        jSpinner18 = new javax.swing.JSpinner();
+        jLabel13 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -266,6 +311,11 @@ public class ManualConfigure extends javax.swing.JFrame {
         jSpinner8.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jSpinner8.setModel(new javax.swing.SpinnerNumberModel(10.0d, 0.0d, 100.0d, 0.1d));
 
+        jSpinner18.setFont(jLabel2.getFont());
+
+        jLabel13.setFont(jLabel2.getFont());
+        jLabel13.setText("Number of Cells");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -284,15 +334,14 @@ public class ManualConfigure extends javax.swing.JFrame {
                 .addGap(69, 69, 69)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jSpinner1, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                        .addComponent(jSpinner2, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jSpinner3, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jSpinner4, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jSpinner5, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jSpinner6, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jSpinner7, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jSpinner9)))
+                    .addComponent(jSpinner1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
+                    .addComponent(jSpinner2)
+                    .addComponent(jSpinner3)
+                    .addComponent(jSpinner4)
+                    .addComponent(jSpinner5)
+                    .addComponent(jSpinner6)
+                    .addComponent(jSpinner7)
+                    .addComponent(jSpinner9, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -305,15 +354,19 @@ public class ManualConfigure extends javax.swing.JFrame {
                             .addComponent(jSpinner13, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSpinner12, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSpinner11, javax.swing.GroupLayout.Alignment.LEADING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 233, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 167, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel12)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGap(53, 53, 53)
-                                .addComponent(jSpinner8, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jSpinner8, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
+                                    .addComponent(jSpinner18))))
                         .addGap(72, 72, 72))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel11)
@@ -321,7 +374,7 @@ public class ManualConfigure extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(228, 228, 228)
                 .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 373, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 236, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -332,23 +385,28 @@ public class ManualConfigure extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel11)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(11, 11, 11)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jSpinner10, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel3))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel2)
+                                            .addComponent(jSpinner10, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel3))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jSpinner11, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(18, 18, 18))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jSpinner11, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(18, 18, 18)
+                                .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(66, 66, 66)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -393,7 +451,8 @@ public class ManualConfigure extends javax.swing.JFrame {
                                     .addComponent(jSpinner17, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(19, 26, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jSpinner18, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -405,7 +464,10 @@ public class ManualConfigure extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         updateRealTimeData();
+        this.updateGUIBasedOnNumOfCells((int)this.jSpinner18.getValue());
         this.mainController.setRealTimeData(this.realTimeData);
+        this.mainController.setChargingParameters(this.chargingParameters);
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -453,6 +515,7 @@ public class ManualConfigure extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -470,6 +533,7 @@ public class ManualConfigure extends javax.swing.JFrame {
     private javax.swing.JSpinner jSpinner15;
     private javax.swing.JSpinner jSpinner16;
     private javax.swing.JSpinner jSpinner17;
+    private javax.swing.JSpinner jSpinner18;
     private javax.swing.JSpinner jSpinner2;
     private javax.swing.JSpinner jSpinner3;
     private javax.swing.JSpinner jSpinner4;

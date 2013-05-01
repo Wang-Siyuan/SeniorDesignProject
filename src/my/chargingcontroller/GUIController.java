@@ -21,6 +21,7 @@ public class GUIController extends Thread{
     private ParameterConfirm parameterConfirm = null;
     private PopupDialog popupDialog = null;
     private ManualConfigure man = null;
+    private AdvancedConfig advconfig= null;
     
     /**
      * The GUIController also hold a local copy of RealTimeData and ChargingParameters
@@ -34,6 +35,7 @@ public class GUIController extends Thread{
     
     //This is a boolean variable that will be used when a new set of parameter is submitted
     private boolean userRequestedCharge;
+    
 
     
     /**
@@ -302,6 +304,49 @@ public class GUIController extends Thread{
     public void setBypassSwitch(int index, boolean isOn)
     {
         this.mainController.setBypass(index, isOn);
+    }
+    
+    public void setDataCollectorMode(boolean isAutomaticMode)
+    {
+        this.chargingParameters.setIsAutomaticMode(isAutomaticMode);
+        this.mainController.setChargingParameters(this.chargingParameters);
+    }
+    
+    public void setArduinoMode(boolean withArduino)
+    {
+        this.chargingParameters.setWithArduino(withArduino);
+        this.mainController.setChargingParameters(this.chargingParameters);
+    }
+    
+    public ChargingParameters getChargingParameters()
+    {
+        return this.chargingParameters;
+    }
+    
+    public void updateMainControllerChargingParameters(ChargingParameters newChargingParameters)
+    {
+        this.mainController.setChargingParameters(newChargingParameters);
+    }
+    
+    public void userRequestedAdvancedConfig()
+    {
+        if(this.advconfig == null)
+        {
+            this.advconfig = new AdvancedConfig(new javax.swing.JFrame(), true, this.chargingParameters, this);
+            this.advconfig.setVisible(true);
+        }else
+        {
+            this.advconfig.setVisible(true);
+            this.advconfig.loadOffsets();
+        }
+    }
+    
+    public void userRequestedClosingAdvancedConfig()
+    {
+        if(this.advconfig != null)
+        {
+            this.advconfig.setVisible(false);
+        }
     }
     
     public void run()

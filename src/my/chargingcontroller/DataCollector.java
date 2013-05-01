@@ -337,6 +337,7 @@ public class DataCollector extends Thread{
         double v_ref = 2.048;
         int v_v = 0;
         double actual_voltage = 0;
+        float offset = this.chargingParameters.getVoltageOffset(index-1);
         
         /**
          * The basic command(without the index offset) that is used for
@@ -362,7 +363,10 @@ public class DataCollector extends Thread{
             {
                 //conversion equations
                 v_v = Integer.parseInt(this.stringBuffer, 16);
-                actual_voltage = 4.096 - v_ref*(v_v/(Math.pow(2,10) - 1));
+                
+                //offset is added here
+                actual_voltage = 4.096 - v_ref*(v_v/(Math.pow(2,10) - 1)) + offset;
+                
                 int temp_result = (int)(actual_voltage*100);
                 actual_voltage = ((double)(temp_result))/100;
                 
@@ -405,6 +409,7 @@ public class DataCollector extends Thread{
         double v_ref = 2.048;
         int v_t = 0;
         int actual_temperature = 0;
+        float offset = this.chargingParameters.getTemperatureOffset(index-1);
         
         /**
          * The basic command(without the index offset) that is used for
@@ -427,6 +432,9 @@ public class DataCollector extends Thread{
                 //conversion equations
                 v_t = Integer.parseInt(this.stringBuffer, 16);
                 actual_temperature = (int)((v_ref*(v_t/(Math.pow(2,10) - 1)) - 0.5)/0.01);
+                
+                //offset is added here
+                actual_temperature += offset;
                 
                 //reset the buffer
                 this.stringBuffer = "";
@@ -452,9 +460,7 @@ public class DataCollector extends Thread{
         //The parameters used for conversion equation
         double v_ref = 2.048;
         double gain = 305;
-//        double v_off = -0.0022;
-//        double v_off = -0.0006;
-        double v_off = 0;
+        float v_off = this.chargingParameters.getCurrentOffset();
         double resistance_bar = 0.000021;
         
         //initialize some local variables
@@ -578,6 +584,7 @@ public class DataCollector extends Thread{
         if(!isOn)
         {
             bytesToWrite[7] = '0';
+            System.out.println("Turning bypass off for index "+ index);
         }
         
         //update the bytes to write based on the index value
@@ -830,169 +837,208 @@ public class DataCollector extends Thread{
         boolean initiatePingToArduino = true;
         
         try{
-            
-            //only proceed if both ports are found
-            if(getPortNames())
+            while(true)
             {
-                
-                //make sure the Serial Reader and Serial Writer has the correct
-                //input and output stream
-                InputStream in = this.portToBMS.getInputStream();
-                OutputStream out = this.portToBMS.getOutputStream();
-
-                this.sr.setInputStream(in);
-                this.sr.setDataCollector(this);
-                this.sw[this.writerIndexForBMS].setOutputStream(out);
-                
-                //This will continuously run until the program exits
-                while(true)
+                //only proceed if both ports are found
+                if(getPortNames() || (this.BMSfound && !this.chargingParameters.getWithArduino()))
                 {
-                    //always work off the RealTimeData and ChargingParameters that the MainController has
-                    this.realTimeData = this.mainController.getRealTimeData();
-                    this.chargingParameters = this.mainController.getChargingParameters();
-                    this.chargingParameters.setPortToArduino(portnameToArduino);
-                    this.chargingParameters.setPortToBMS(portnameToBMS);
                     
-                    //reset the Error Message fields
-                    this.realTimeData.setErrorMessage("");
-                    this.realTimeData.setErrorOccurred(false);
-                    
-                    this.writeToDatabase("<Pack>");
-                    
-                    //always initialize this boolean variable to false
-                    errorOccurred = false;
-                    
-                    //read the current
-                    currentReading = this.getPackCurrent();
-                    this.realTimeData.setCurrent(currentReading);                    
-                    
-                    this.turnOffAllBypass();
-                    
-                    this.writeToDatabase("\t<Cells>");
-                    
-                    //go through all possible cells
-                    for(int i = 1; i <= 8; i++)
+                    if(this.ArduinoFound)
                     {
-                        //test the cells one by one, only proceed to acquire data if the test passed
-                        if(this.testCell(i))
-                        {
-                            this.writeToDatabase("\t\t<Cell><CellNumber>"+i+"<\\CellNumber>");
-                            
-                            //get the cell voltage
-                            voltageReading = this.getCellVoltage(i);
-                            if(  voltageReading != 0 )
-                            {
-                                this.realTimeData.setVoltage(i-1, voltageReading);
-                            }else{
-                                errorOccurred = true;
-                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Voltage Value \n");
-                            }
-                            
-                            this.writeToDatabase("\t\t\t<Voltage>"+voltageReading+"<\\Voltage>");
-                            
-                            //get the cell temperature
-                            tempReading = this.getCellTemp(i);
-                            if(  tempReading != 0 )
-                            {
-                                this.realTimeData.setTemperature(i-1, tempReading);
-                            }else{
-                                errorOccurred = true;
-                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Temperature Value \n");
-                            }
-                            
-                            this.writeToDatabase("\t\t\t<Temperature>"+tempReading+"<\\Temperature>");
+                        this.chargingParameters.setWithArduino(true);
+                    }
+                    
+                    //make sure the Serial Reader and Serial Writer has the correct
+                    //input and output stream
+                    InputStream in = this.portToBMS.getInputStream();
+                    OutputStream out = this.portToBMS.getOutputStream();
 
-                            
-                            //get the bypass state
-                            bypassState = this.getBypassState(i);
-                            
-                            if( bypassState == 1)
-                            {
-                                this.realTimeData.setBypassInfo(i-1, true);
-                                
-                                long bypassTime = this.getBypassTime(i);
-                                //also retrieve the bypass time if it is bypassed
-                                this.realTimeData.setBypassTime(i-1, bypassTime);
-                                this.writeToDatabase("\t\t\t<Bypassed>true<\\Bypassed>");
-                                this.writeToDatabase("\t\t\t<BypassTime>"+bypassTime+"<\\BypassTime>");
-                            }else if(bypassState == 0)
-                            {
-                                this.realTimeData.setBypassInfo(i-1, false);
-                                this.writeToDatabase("\t\t\t<Bypassed>false<\\Bypassed>");
-                                this.writeToDatabase("\t\t\t<BypassTime>0<\\BypassTime>");
-                            }else if( bypassState == -1 )
-                            {
-                                errorOccurred = true;
-                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Bypass State \n");
-                            }
-                            
-                        }else if(i != 1)
+                    this.sr.setInputStream(in);
+                    this.sr.setDataCollector(this);
+                    this.sw[this.writerIndexForBMS].setOutputStream(out);
+
+                    //This will continuously run until the program exits
+                    while(true)
+                    {
+                        //always work off the RealTimeData and ChargingParameters that the MainController has
+                        this.realTimeData = this.mainController.getRealTimeData();
+                        this.chargingParameters = this.mainController.getChargingParameters();
+                        this.chargingParameters.setPortToArduino(portnameToArduino);
+                        this.chargingParameters.setPortToBMS(portnameToBMS);
+
+                        //reset the Error Message fields
+                        this.realTimeData.setErrorMessage("");
+                        this.realTimeData.setErrorOccurred(false);
+
+                        this.writeToDatabase("<Pack>");
+
+                        //always initialize this boolean variable to false
+                        errorOccurred = false;
+
+                        //read the current
+                        currentReading = this.getPackCurrent();
+                        this.realTimeData.setCurrent(currentReading);                    
+
+                        this.writeToDatabase("\t<Cells>");
+
+                        //go through all possible cells
+                        for(int i = 1; i <= 8; i++)
                         {
-                            //update the number of cells
-                            this.chargingParameters.setNumOfCells(i-1);
-                            break;
+                            //test the cells one by one, only proceed to acquire data if the test passed
+                            if(this.testCell(i))
+                            {
+                                this.writeToDatabase("\t\t<Cell><CellNumber>"+i+"<\\CellNumber>");
+
+                                //get the cell voltage
+                                voltageReading = this.getCellVoltage(i);
+                                if(  voltageReading != 0 )
+                                {
+                                    this.realTimeData.setVoltage(i-1, voltageReading);
+                                }else{
+                                    errorOccurred = true;
+                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Voltage Value \n");
+                                }
+
+                                this.writeToDatabase("\t\t\t<Voltage>"+voltageReading+"<\\Voltage>");
+
+                                //get the cell temperature
+                                tempReading = this.getCellTemp(i);
+                                if(  tempReading != 0 )
+                                {
+                                    this.realTimeData.setTemperature(i-1, tempReading);
+                                }else{
+                                    errorOccurred = true;
+                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Temperature Value \n");
+                                }
+
+                                this.writeToDatabase("\t\t\t<Temperature>"+tempReading+"<\\Temperature>");
+
+
+                                //get the bypass state
+                                bypassState = this.getBypassState(i);
+
+                                if( bypassState == 1)
+                                {
+                                    this.realTimeData.setBypassInfo(i-1, true);
+
+                                    long bypassTime = this.getBypassTime(i);
+                                    //also retrieve the bypass time if it is bypassed
+                                    this.realTimeData.setBypassTime(i-1, bypassTime);
+                                    this.writeToDatabase("\t\t\t<Bypassed>true<\\Bypassed>");
+                                    this.writeToDatabase("\t\t\t<BypassTime>"+bypassTime+"<\\BypassTime>");
+                                }else if(bypassState == 0)
+                                {
+                                    this.realTimeData.setBypassInfo(i-1, false);
+                                    this.writeToDatabase("\t\t\t<Bypassed>false<\\Bypassed>");
+                                    this.writeToDatabase("\t\t\t<BypassTime>0<\\BypassTime>");
+                                }else if( bypassState == -1 )
+                                {
+                                    errorOccurred = true;
+                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Bypass State \n");
+                                }
+
+                            }else if(i != 1)
+                            {
+                                //update the number of cells
+                                this.chargingParameters.setNumOfCells(i-1);
+                                break;
+                            }else
+                            {
+                                //error handling for no cells
+                                this.realTimeData.setErrorOccurred(true);
+                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"No Cell Detected.  Please check if one of the cells have address 0x02\n");
+                                errorOccurred = true;
+                            }
+                            this.writeToDatabase("\t\t<\\Cell>");
+                        }
+                        
+                        this.writeToDatabase("<\\Cells>");
+                        this.writeToDatabase("<Current>"+currentReading+"<\\Current>");
+                        this.writeToDatabase("<NumberOfCells>"+this.chargingParameters.getNumOfCells()+"<\\NumberOfCells>");
+                        this.writeToDatabase("<\\Pack>");
+                        if(initiatePingToArduino)
+                        {
+                            initiatePingToArduino = false;
                         }else
                         {
-                            //error handling for no cells
-                            this.realTimeData.setErrorOccurred(true);
-                            this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"No Cell Detected.  Please check if one of the cells have address 0x02\n");
-                            errorOccurred = true;
+                            if(!this.testArduino() && this.chargingParameters.getWithArduino())
+                            {
+                                errorOccurred = true;
+                                this.realTimeData.setErrorOccurred(true);
+                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"The Arduino Board is disconnected\n");
+                            }
                         }
-                        this.writeToDatabase("\t\t<\\Cell>");
-                    }
-                    this.writeToDatabase("<\\Cells>");
-                    this.writeToDatabase("<Current>"+currentReading+"<\\Current>");
-                    this.writeToDatabase("<NumberOfCells>"+this.chargingParameters.getNumOfCells()+"<\\NumberOfCells>");
-                    this.writeToDatabase("<\\Pack>");
-                    if(initiatePingToArduino)
-                    {
-                        initiatePingToArduino = false;
-                    }else
-                    {
-                        if(!this.testArduino())
+
+                        //set the errorOccurred field to be true if error did occur
+                        if(!errorOccurred)
                         {
-                            errorOccurred = true;
-                            this.realTimeData.setErrorOccurred(true);
-                            this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"The Arduino Board is disconnected\n");
+                            this.realTimeData.setErrorOccurred(false);
+                        }
+
+                        //update the MainController's RealTimeData and ChargingParameters
+                        this.mainController.setRealTimeData(this.realTimeData);
+                        this.mainController.setChargingParameters(this.chargingParameters);
+
+                        try{
+                            Thread.sleep(SLEEP_TIME_BTW_EACH_DATA_ACQUISITION);
+                        }catch(Exception e)
+                        {
+                            this.writeToErrorFile("Cannot set the DataCollector Thread to sleep");
+                        }
+                        
+                        while(!this.chargingParameters.getIsAutomaticMode())
+                        {
+                            this.chargingParameters = this.mainController.getChargingParameters();
+                            this.realTimeData = this.mainController.getRealTimeData();
+                            try{
+                                
+                                for(int i = 1; i <= this.chargingParameters.getNumOfCells(); i++)
+                                {
+                                    //get the bypass state
+                                    bypassState = this.getBypassState(i);
+                                    if( bypassState == 1)
+                                    {
+                                        this.realTimeData.setBypassInfo(i-1, true);
+
+                                        long bypassTime = this.getBypassTime(i);
+                                        //also retrieve the bypass time if it is bypassed
+                                        this.realTimeData.setBypassTime(i-1, bypassTime);
+                                    }else if(bypassState == 0)
+                                    {
+                                        this.realTimeData.setBypassInfo(i-1, false);
+                                    }
+                                }
+                                this.mainController.setRealTimeData(this.realTimeData);
+                                Thread.yield();
+                            }catch(Exception e)
+                            {
+                                this.writeToErrorFile("Cannot yield the DataCollector Thread");
+                            }
                         }
                     }
-                    
-                    //set the errorOccurred field to be true if error did occur
-                    if(!errorOccurred)
-                    {
-                        this.realTimeData.setErrorOccurred(false);
-                    }
-                    
-                    //update the MainController's RealTimeData and ChargingParameters
-                    this.mainController.setRealTimeData(this.realTimeData);
-                    this.mainController.setChargingParameters(this.chargingParameters);
-                    
-                    try{
-                        Thread.sleep(SLEEP_TIME_BTW_EACH_DATA_ACQUISITION);
-                    }catch(Exception e)
-                    {
-                        this.writeToErrorFile("Cannot set the DataCollector Thread to sleep");
-                    }
-                }
-            }else
-            {
-                while(true)
+                }else
                 {
-                    if(!BMSfound)
+                    while(true)
                     {
-                        this.realTimeData.setErrorMessage("BMS board not found. Please close the program and restart it");
-                    }else if(!ArduinoFound)
-                    {
-                        this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Arduino board not found. Please close the program and restart it");
-                    }
-                    this.realTimeData.setErrorOccurred(true);
-                    this.mainController.setRealTimeData(this.realTimeData);
-                    
-                    try{
-                        Thread.sleep(4000);
-                    }catch(Exception e)
-                    {
-                        this.writeToErrorFile("Cannot set the DataCollector Thread to sleep");
+                        if(!BMSfound)
+                        {
+                            this.realTimeData.setErrorMessage("BMS board not found. Please close the program and restart it");
+                        }else if(!ArduinoFound && this.chargingParameters.getWithArduino())
+                        {
+                            this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Arduino board not found. Please close the program and restart it");
+                        }else if(!ArduinoFound && !this.chargingParameters.getWithArduino())
+                        {
+                            break;
+                        }
+                        this.realTimeData.setErrorOccurred(true);
+                        this.mainController.setRealTimeData(this.realTimeData);
+
+                        try{
+                            Thread.sleep(4000);
+                        }catch(Exception e)
+                        {
+                            this.writeToErrorFile("Cannot set the DataCollector Thread to sleep");
+                        }
                     }
                 }
             }
