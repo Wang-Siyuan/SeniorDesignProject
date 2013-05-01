@@ -991,7 +991,7 @@ public class DataCollector extends Thread{
                             this.chargingParameters = this.mainController.getChargingParameters();
                             this.realTimeData = this.mainController.getRealTimeData();
                             try{
-                                
+                                System.out.println("About to check bypass info");
                                 for(int i = 1; i <= this.chargingParameters.getNumOfCells(); i++)
                                 {
                                     //get the bypass state

@@ -30,7 +30,7 @@ public class MainController extends Thread{
         double iUpper = 500;
         int tUpper = 200;
         int bypassDuration = 20;
-        int bypassThreshold = 50;
+        double bypassThreshold = 0.05;
         double bypassCutoff = vUpper - 0.2;
         ArrayList<String> listOfPorts = new ArrayList<String>();
         String portToPC = "";
@@ -279,10 +279,14 @@ public class MainController extends Thread{
                     {
                         for (int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
                         {
+                             //System.out.println("Checking bypass for "+ i);
                             if(this.checkForBypass(i) && !this.realTimeData.getBypassInfo(i))
                             {
-                                System.out.println("One of them needs to be bypassed!");
+                                System.out.println("One of them is about to be bypassed!");
                                 this.dataCollector.setBypassSwitch(i+1, true);
+                            }else if(this.checkForBypass(i))
+                            {
+                                System.out.println(i+" needs to be bypassed but is already bypassed!");
                             }
                         }
                     }
@@ -347,6 +351,12 @@ public class MainController extends Thread{
                (this.realTimeData.getVoltage(index) < this.chargingParameters.getBypassCutoff()))
             {
                 bypassNeeded = true;
+            }else if (this.realTimeData.getDiff(index, i) < this.chargingParameters.getBypassThreshold())
+            {
+                //System.out.println("Diff " + this.realTimeData.getDiff(index, i) +" not large enough to be larger than "+ this.chargingParameters.getBypassThreshold());
+            }else if(this.realTimeData.getVoltage(index) > this.chargingParameters.getBypassCutoff())
+            {
+                //System.out.println(this.realTimeData.getVoltage(index) + " larger than " + this.chargingParameters.getBypassCutoff()+ ", which is the bypass cuttoff");
             }
         }
         

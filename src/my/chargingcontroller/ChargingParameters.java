@@ -15,7 +15,7 @@ public class ChargingParameters {
     private double iUpper = 0;
     private int tUpper = 0;
     private int bypassDuration = 0;
-    private int bypassThreshold = 0; 
+    private double bypassThreshold = 0; 
     private double bypassCutoff = 0;
     private ArrayList<String> listOfPorts = null;
     private String portToBMS = null;
@@ -43,7 +43,7 @@ public class ChargingParameters {
      */
     public ChargingParameters(  int _numOfCells, double _vUpper, double _iUpper, 
                                 int _tUpper, int _bypassDuration,
-                                int _bypassThreshold, double _bypassCutoff, 
+                                double _bypassThreshold, double _bypassCutoff, 
                                 ArrayList<String> _listOfPorts,
                                 String _portToBMS, String _portToArduino, int _chargingTime,
                                 float[] _voltageOffset, float[] _temperatureOffset, float _currentOffset )
@@ -88,7 +88,7 @@ public class ChargingParameters {
      */
     public void setParameters(  int _numOfCells, double _vUpper, double _iUpper, 
                                 int _tUpper, int _bypassDuration, double _bypassCutoff,
-                                int _bypassThreshold, ArrayList<String> _listOfPorts,
+                                double _bypassThreshold, ArrayList<String> _listOfPorts,
                                 String _portToBMS, String _portToArduino, int _chargingTime )
     {
         this.numOfCells = _numOfCells;
@@ -158,12 +158,12 @@ public class ChargingParameters {
         return this.bypassDuration;
     }
     
-    public void setBypassThreshold(int _bypassThreshold)
+    public void setBypassThreshold(double _bypassThreshold)
     {
         this.bypassThreshold = _bypassThreshold;
     }
     
-    public int getBypassThreshold()
+    public double getBypassThreshold()
     {
         return this.bypassThreshold;
     }
