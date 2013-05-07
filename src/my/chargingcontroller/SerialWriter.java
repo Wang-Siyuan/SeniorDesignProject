@@ -57,11 +57,6 @@ public class SerialWriter extends Thread{
         {
             try
             { 
-                if(Thread.interrupted())
-                {
-                    throw new InterruptedException();
-                }
-                
                 this.out.write('G');
                 this.out.write('3');
                 this.out.write('S');
@@ -70,11 +65,8 @@ public class SerialWriter extends Thread{
                     this.out.write(data[i]);
                 }
                 this.out.write('P');
-            }catch( InterruptedException e)
-            {
-                return;
-            }
-            catch ( IOException e )
+                
+            }catch ( IOException e )
             {
                 e.printStackTrace();
             }

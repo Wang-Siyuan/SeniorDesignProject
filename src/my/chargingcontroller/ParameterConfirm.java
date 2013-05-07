@@ -24,7 +24,7 @@ public class ParameterConfirm extends javax.swing.JFrame {
         this.jTextField3.setText(""+this.chargingParameters.getTemperatureUpperLimit()+" Celsius");
         this.jTextField5.setText(""+this.chargingParameters.getCurrentUpperLimit()+" A");
         this.jTextField6.setText(""+this.chargingParameters.getBypassDuration()+" min");
-        this.jTextField7.setText(""+this.chargingParameters.getBypassThreshold()+" mV");
+        this.jTextField7.setText(""+this.chargingParameters.getBypassThreshold()*1000+" mV");
         this.setLocation((int)(this.getGraphicsConfiguration().getBounds().getWidth()-this.getWidth())/2,(int)(this.getGraphicsConfiguration().getBounds().getHeight()-this.getHeight())/2);
     }
 

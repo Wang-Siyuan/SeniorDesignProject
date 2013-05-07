@@ -39,7 +39,7 @@ public class ParameterSetup extends javax.swing.JFrame {
         this.jTextField3.setText(""+this.chargingParameters.getTemperatureUpperLimit());
         this.jTextField4.setText(""+this.chargingParameters.getCurrentUpperLimit());
         this.jTextField5.setText(""+this.chargingParameters.getBypassDuration());
-        this.jTextField6.setText(""+this.chargingParameters.getBypassThreshold());
+        this.jTextField6.setText(""+this.chargingParameters.getBypassThreshold()*1000);
         this.jTextField2.setText(""+this.chargingParameters.getChargingTime());
         this.jTextField7.setText("");
     }
@@ -386,7 +386,7 @@ public class ParameterSetup extends javax.swing.JFrame {
             this.chargingParameters.setBypassDuration(bypassDuration);
         }
 
-        Integer bypassThreshold = Integer.parseInt(this.jTextField6.getText());
+        Double bypassThreshold = Double.parseDouble(this.jTextField6.getText());
         if(bypassThreshold<0 || bypassThreshold >5000)
         {
             error = true;

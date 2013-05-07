@@ -25,10 +25,10 @@ public class MainController extends Thread{
     public MainController() {
                 
         /* generate a set of default charging parameters */
-        int numOfCells = 8;
-        double vUpper = 4;
-        double iUpper = 500;
-        int tUpper = 200;
+        int numOfCells = 3;
+        double vUpper = 3.8;
+        double iUpper = 30;
+        int tUpper = 50;
         int bypassDuration = 20;
         double bypassThreshold = 0.05;
         double bypassCutoff = vUpper - 0.2;
@@ -129,6 +129,7 @@ public class MainController extends Thread{
     public void userRequestedStop()
     {
         this.realTimeData.setIsCharging(false);
+        this.dataCollector.requestToTurnOffAllBypass = true;
     }
     
     /*
@@ -157,16 +158,24 @@ public class MainController extends Thread{
     
     public void setBypass(int index, boolean isOn)
     {
-        this.dataCollector.setBypassSwitch(index, isOn);
+        if(isOn)
+        {
+            this.dataCollector.requestToTurnOnBypass[index-1] = true;
+        }else
+        {
+            this.dataCollector.requestToTurnOffBypass[index-1] = false;
+        }
     }
     
     
     public void run()
     {   
-        for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
+        boolean[] cellBypassCommandSent = new boolean[8];
+        for(int i = 0; i < 8; i++)
         {
-            this.dataCollector.setBypassSwitch(j, false);
+            cellBypassCommandSent[i] = false;
         }
+        
         /* MainController thread will keep running until the program exits */
         while(true)
         {
@@ -204,13 +213,31 @@ public class MainController extends Thread{
                     {
                        //tell the user at least one of the cells is overcharged
                         this.guiController.createdPopupDialog("Warning", "Charging cannot start because at least one of the cells has voltage that is above the voltage upper limit.");
+                        try{
+                            Thread.sleep(4000);
+                        }catch(Exception e)
+                        {
+                            
+                        }
                     }else if(this.checkForCellOverheating())
                     {
                         //tell the user at least one of the cells is overheating
                         this.guiController.createdPopupDialog("Warning", "Charging cannot start because at least one of the cells is overheating.");
+                        try{
+                            Thread.sleep(4000);
+                        }catch(Exception e)
+                        {
+                            
+                        }
                     }else if(this.checkForCurrentOverLimit())
                     {
                         this.guiController.createdPopupDialog("Warning", "Charging cannot start because the current is already over the upper limit.");
+                        try{
+                            Thread.sleep(4000);
+                        }catch(Exception e)
+                        {
+                            
+                        }
                     }else
                     {
                         this.realTimeData.setState(RealTimeData.State.CHARGING);
@@ -280,13 +307,14 @@ public class MainController extends Thread{
                         for (int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
                         {
                              //System.out.println("Checking bypass for "+ i);
-                            if(this.checkForBypass(i) && !this.realTimeData.getBypassInfo(i))
+                            boolean result = this.checkForBypass(i);
+                            if( result && !this.realTimeData.getBypassInfo(i) & !cellBypassCommandSent[i])
                             {
-                                System.out.println("One of them is about to be bypassed!");
                                 this.dataCollector.setBypassSwitch(i+1, true);
-                            }else if(this.checkForBypass(i))
+                                cellBypassCommandSent[i] = true;
+                            }else if(this.realTimeData.getBypassInfo(i))
                             {
-                                System.out.println(i+" needs to be bypassed but is already bypassed!");
+                                cellBypassCommandSent[i] = false;
                             }
                         }
                     }
@@ -299,7 +327,7 @@ public class MainController extends Thread{
             }
             this.realTimeData.setState(RealTimeData.State.IDLE);
             try{
-                Thread.sleep(100);
+                Thread.sleep(10);
             }catch(Exception e)
             {
                 
@@ -346,8 +374,7 @@ public class MainController extends Thread{
         boolean bypassNeeded = false;
         for(int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
         {
-            if((this.realTimeData.getDiff(index, i) > this.chargingParameters.getBypassThreshold()) && 
-               (index != i) &&
+            if((index != i) && (this.realTimeData.getDiff(index, i) > this.chargingParameters.getBypassThreshold()) &&
                (this.realTimeData.getVoltage(index) < this.chargingParameters.getBypassCutoff()))
             {
                 bypassNeeded = true;
