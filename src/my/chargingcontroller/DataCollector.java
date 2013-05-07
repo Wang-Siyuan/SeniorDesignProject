@@ -184,7 +184,7 @@ public class DataCollector extends Thread{
             {
                 if(!this.stringBuffer.equals(""))
                 {
-                    this.writeToErrorFile("Received some data when trying to connect to Arduino and BMS, but it isn't the correct respond message");
+                    this.writeToErrorFile("Received some data when trying to connect to Arduino and BMS, but it isn't the correct respond message.");
                 }
                 
                 /*  Dear future engineers, if you could make the following calls
@@ -217,7 +217,7 @@ public class DataCollector extends Thread{
      * This is the function to write a string content to a local file
      * @param content 
      */
-    public void writeToFile(String content)
+    public void writeToFile(String content, int index)
     {
         boolean emptyFile = false;
         try {
@@ -231,9 +231,17 @@ public class DataCollector extends Thread{
             br.close();
             if(emptyFile)
             {
-                out.println("System Time(s)\tVoltage\tTime in Readable Format");
+                out.println("System Time(s)\tCell 1 Voltage\tCell 2 Voltage\tCell 3 Voltage\tTime in Readable Format");
             }
-            out.println(content);
+            
+            if(index == this.chargingParameters.getNumOfCells())
+            {
+                out.println(content);
+            }else
+            {
+                out.print(content);
+            }
+            
             out.close();
         } catch (IOException e) {
             this.writeToErrorFile("IO Exceptions occurred when trying to record cell characteristic data");
@@ -372,16 +380,22 @@ public class DataCollector extends Thread{
                 
                 //format what to write to the local file and write it
                 String stringToWrite = "";
-                stringToWrite += (System.currentTimeMillis())/1000;
-                stringToWrite += "\t";
+                
+                if(index == 1)
+                {
+                    stringToWrite += (System.currentTimeMillis())/1000;
+                    stringToWrite += "\t";
+                }
                 stringToWrite += actual_voltage;
                 stringToWrite += "\t";
-                Date date = new Date(System.currentTimeMillis());
-                stringToWrite += date.toString();
-                
+                if(index == this.chargingParameters.getNumOfCells())
+                {
+                    Date date = new Date(System.currentTimeMillis());
+                    stringToWrite += date.toString();
+                }
                 if(this.realTimeData.getIsCharging())
                 {
-                    this.writeToFile(stringToWrite);
+                    this.writeToFile(stringToWrite, index);
                 }
                 
                 //reset the string buffer to empty
@@ -809,19 +823,45 @@ public class DataCollector extends Thread{
         //go through all the cells and turn off bypass if they are on
         for(int i = 1; i <= 8; i++)
         {
+            boolean result = this.testCell(i);
             //test the cells one by one, only proceed to acquire data if the test passed
-            if(this.testCell(i))
+            if(result && this.getBypassState(i) == 1)
             {
                 //set the bypass to off
                 this.setBypassSwitch(i, false);
-
-            }else if(i != 1)
+                try{
+                    Thread.sleep(1000);
+                }catch(Exception e)
+                {
+                    this.writeToErrorFile("Exceptions occurred when trying put the datacollector thread to sleep.");
+                }
+            }else if(!result && i != 1)
             {
                 this.chargingParameters.setNumOfCells(i-1);
                 break;
             }
         }
     }
+    
+    public void fixBoardAddress()
+    {
+      //the command to verify if the cell is there
+        byte[] bytesToWrite = {'0','0','0','1','0','0','0','2'};
+        
+        try{
+            
+            //write the BMS board with the test command
+            this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
+            
+            //allow the Serial Reader to write to the string buffer
+            Thread.sleep(SLEEP_TIME_FOR_READER);
+            
+        }catch(Exception e)
+        {
+            this.writeToErrorFile("Exceptions occurred when trying to test cell.");
+        } 
+    }
+    
     
     /*
      * This is the function that will run once the DataCollector Thread starts
@@ -839,6 +879,8 @@ public class DataCollector extends Thread{
         try{
             while(true)
             {
+                this.fixBoardAddress();
+
                 //only proceed if both ports are found
                 if(getPortNames() || (this.BMSfound && !this.chargingParameters.getWithArduino()))
                 {
@@ -884,6 +926,8 @@ public class DataCollector extends Thread{
                         //go through all possible cells
                         for(int i = 1; i <= 8; i++)
                         {
+                            this.fixBoardAddress();
+                            
                             //test the cells one by one, only proceed to acquire data if the test passed
                             if(this.testCell(i))
                             {
@@ -896,7 +940,7 @@ public class DataCollector extends Thread{
                                     this.realTimeData.setVoltage(i-1, voltageReading);
                                 }else{
                                     errorOccurred = true;
-                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Voltage Value \n");
+                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Voltage Value. Check the BMS board connection.\n Restart this charger program if this message reappears\n");
                                 }
 
                                 this.writeToDatabase("\t\t\t<Voltage>"+voltageReading+"<\\Voltage>");
@@ -908,7 +952,7 @@ public class DataCollector extends Thread{
                                     this.realTimeData.setTemperature(i-1, tempReading);
                                 }else{
                                     errorOccurred = true;
-                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Temperature Value \n");
+                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Temperature Value. Check the BMS board connection.\n Restart this charger program if this message reappears\n");
                                 }
 
                                 this.writeToDatabase("\t\t\t<Temperature>"+tempReading+"<\\Temperature>");
@@ -934,7 +978,7 @@ public class DataCollector extends Thread{
                                 }else if( bypassState == -1 )
                                 {
                                     errorOccurred = true;
-                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Bypass State \n");
+                                    this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage() + "Cannot Read Bypass State.Check the BMS board connection.\n Restart this charger program if this message reappears\n");
                                 }
 
                             }else if(i != 1)
@@ -965,7 +1009,7 @@ public class DataCollector extends Thread{
                             {
                                 errorOccurred = true;
                                 this.realTimeData.setErrorOccurred(true);
-                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"The Arduino Board is disconnected\n");
+                                this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"The Arduino Board is disconnected. Restart this Charger Program\n");
                             }
                         }
 
@@ -991,7 +1035,6 @@ public class DataCollector extends Thread{
                             this.chargingParameters = this.mainController.getChargingParameters();
                             this.realTimeData = this.mainController.getRealTimeData();
                             try{
-                                System.out.println("About to check bypass info");
                                 for(int i = 1; i <= this.chargingParameters.getNumOfCells(); i++)
                                 {
                                     //get the bypass state
