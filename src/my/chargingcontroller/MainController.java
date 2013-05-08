@@ -18,27 +18,37 @@ public class MainController extends Thread{
     private GUIController guiController = null;
     private DataCollector dataCollector = null;
     private long chargingStartTime = 0;
+    public static boolean[] mostRecentBypassInfo = null;
     
     /**
      * Constructor of MainController
      */
     public MainController() {
                 
+        mostRecentBypassInfo = new boolean[8];
+        for(int i = 0; i < 8; i++)
+        {
+            this.mostRecentBypassInfo[i] = false;
+        }
+        
         /* generate a set of default charging parameters */
         int numOfCells = 3;
         double vUpper = 3.8;
-        double iUpper = 30;
+        double iUpper = 1000;
         int tUpper = 50;
         int bypassDuration = 20;
-        double bypassThreshold = 0.05;
+        double bypassThreshold = 0.06;
         double bypassCutoff = 3.6;
         ArrayList<String> listOfPorts = new ArrayList<String>();
         String portToPC = "";
         String portToArduino = "";
         int ChargingTime = 180;
         float[] voltageOffsets = new float[8];
+        voltageOffsets[0] = (float)(-0.037);
+        voltageOffsets[1] = (float)(-0.01);
+        voltageOffsets[2] = (float)(0.028);
         float[] temperatureOffsets = new float[8];
-        float currentOffset = 0;
+        float currentOffset = (float)(-0.0010);
         
         defaultChargingParameters = new ChargingParameters(     numOfCells, 
                                                                 vUpper,
@@ -130,6 +140,7 @@ public class MainController extends Thread{
     {
         this.realTimeData.setIsCharging(false);
         this.dataCollector.requestToTurnOffAllBypass = true;
+        this.dataCollector.requestToTurnOffRelay = true;
     }
     
     /*
@@ -243,6 +254,7 @@ public class MainController extends Thread{
                         this.realTimeData.setState(RealTimeData.State.CHARGING);
                         this.dataCollector.requestToTurnOnRelay = true;
                         this.chargingStartTime = System.currentTimeMillis();
+                        this.dataCollector.requestToSetBypassTime = true;
                     }
                 }
                 
@@ -311,6 +323,8 @@ public class MainController extends Thread{
                             if( result && !this.realTimeData.getBypassInfo(i) & !cellBypassCommandSent[i])
                             {
                                 this.dataCollector.requestToTurnOnBypass[i] = true;
+                                this.mostRecentBypassInfo[i] = true;
+                                System.out.println("most recent bypass info for index "+i+" set to true");
                                 cellBypassCommandSent[i] = true;
                             }else if(this.realTimeData.getBypassInfo(i))
                             {
@@ -338,7 +352,8 @@ public class MainController extends Thread{
     public void exitAndCleanUp()
     {
         this.dataCollector.requestToTurnOffAllBypass = true;
-        System.exit(0);
+        this.dataCollector.requestToTurnOffRelay = true;
+        //System.exit(0);
     }
     
     public boolean checkForCellOverheating()
@@ -374,7 +389,7 @@ public class MainController extends Thread{
         boolean bypassNeeded = false;
         for(int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
         {
-            if((index != i) && (this.realTimeData.getDiff(index, i) > this.chargingParameters.getBypassThreshold()) &&
+            if((index != i) && (this.realTimeData.getDiff(index, i) > this.chargingParameters.getBypassThreshold()) && !this.mostRecentBypassInfo[i] &&
                (this.realTimeData.getVoltage(index) < this.chargingParameters.getBypassCutoff()))
             {
                 if(index == 3)

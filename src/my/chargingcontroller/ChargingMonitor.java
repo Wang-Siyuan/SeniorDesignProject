@@ -1455,7 +1455,14 @@ public class ChargingMonitor extends javax.swing.JFrame{
         jProgressBar14.setValue((int)(100*realTimeData.getTemperature(5)/chargingParameters.getTemperatureUpperLimit()));
         jProgressBar15.setValue((int)(100*realTimeData.getTemperature(6)/chargingParameters.getTemperatureUpperLimit()));
         jProgressBar16.setValue((int)(100*realTimeData.getTemperature(7)/chargingParameters.getTemperatureUpperLimit()));
-        jProgressBar17.setValue((int)(100*realTimeData.getCurrent()/chargingParameters.getCurrentUpperLimit()));      
+        int current = (int)(100*realTimeData.getCurrent()/chargingParameters.getCurrentUpperLimit());
+        if(current < 0)
+        {
+            jProgressBar17.setValue(0);
+        }else{
+            jProgressBar17.setValue(current);
+        }
+            
         jProgressBar18.setValue((int)(100*realTimeData.getMaxTemp()/chargingParameters.getTemperatureUpperLimit())); 
     }
     
@@ -1471,7 +1478,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
         }else if(realTimeData.getState() == realTimeData.state.CHARGING)
         {
             jLabel9.setText("CHARGING");
-            this.jLabel10.setText("Charging Time Left: " + (this.chargingParameters.getChargingTime() - this.realTimeData.getCurrentChargingTime()) + " min");
+            this.jLabel10.setText("Charging Time is "+ this.realTimeData.getCurrentChargingTime() + " min (" +(this.chargingParameters.getChargingTime() - this.realTimeData.getCurrentChargingTime()) + " min left)");
         }else if(realTimeData.getState() == realTimeData.state.IDLE)
         {
             jLabel9.setText("IDLE");
@@ -1503,7 +1510,14 @@ public class ChargingMonitor extends javax.swing.JFrame{
         this.jProgressBar14.setString(String.valueOf(this.realTimeData.getTemperature(5))+" Celsius");
         this.jProgressBar15.setString(String.valueOf(this.realTimeData.getTemperature(6))+" Celsius");
         this.jProgressBar16.setString(String.valueOf(this.realTimeData.getTemperature(7))+" Celsius");
-        this.jProgressBar17.setString(String.valueOf(this.realTimeData.getCurrent())+"A");
+        
+        if(this.realTimeData.getCurrent() < 0)
+        {
+            this.jProgressBar17.setString("0A");;
+        }else
+        {
+            this.jProgressBar17.setString(String.valueOf(this.realTimeData.getCurrent())+"A");
+        }
         this.jProgressBar18.setString(String.valueOf(this.realTimeData.getMaxTemp())+" Celsius");
     }
     

@@ -367,7 +367,7 @@ public class ParameterSetup extends javax.swing.JFrame {
         }
 
         Double iUpper = Double.parseDouble(this.jTextField4.getText());
-        if(iUpper<0 || iUpper >600)
+        if(iUpper<0)
         {
             error = true;
             warningMsg += "Current upper threshold has to be between 0 and 600 Amperes"+eol;

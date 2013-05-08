@@ -19,7 +19,7 @@ public class DataCollector extends Thread{
     private static final String ARDUINO_CONFIRM_TWO = "Ardu";
     private static final byte ARDUINO_COMMAND_ON = 'a';
     private static final byte ARDUINO_COMMAND_OFF = 'b';
-    private static final int SLEEP_TIME_FOR_READER = 300;
+    private static final int SLEEP_TIME_FOR_READER = 500;
     private static final int SLEEP_TIME_BTW_EACH_DATA_ACQUISITION = 100;
     private static final String BMS_INVALID_MSG = "FFFF";
     private static final String BYPASS_ON = "0001";
@@ -81,6 +81,7 @@ public class DataCollector extends Thread{
     public boolean[] requestToTurnOnBypass = null;
     public boolean requestToTurnOnRelay = false;
     public boolean requestToTurnOffRelay = true;
+    public boolean requestToSetBypassTime = false;
             
     public DataCollector(MainController _mainController, RealTimeData _realTimeData, ChargingParameters _chargingParameters)
     {
@@ -374,7 +375,7 @@ public class DataCollector extends Thread{
             
             //write the bytes to the BMS board
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
-            this.writeToEventLog("[Event]: Send command to BMS with index"+index+"to acquire cell voltage");
+            this.writeToEventLog("[Event]: Send command to BMS with index "+index+" to acquire cell voltage");
             
             //give the Serial Reader a little time before reading it
             Thread.sleep(SLEEP_TIME_FOR_READER);
@@ -453,7 +454,7 @@ public class DataCollector extends Thread{
         try{
             
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
-            this.writeToEventLog("[Event]: Send command to BMS with index"+index+"to acquire cell temperature");
+            this.writeToEventLog("[Event]: Send command to BMS with index "+index+" to acquire cell temperature");
             
             Thread.sleep(SLEEP_TIME_FOR_READER);
             if(!this.stringBuffer.equals(BMS_INVALID_MSG))
@@ -573,7 +574,7 @@ public class DataCollector extends Thread{
             //write the bytes to the BMS board
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             
-            this.writeToEventLog("[Event]: Send command to BMS with index"+index+"to acquire cell bypass time");
+            this.writeToEventLog("[Event]: Send command to BMS with index "+index+" to acquire cell bypass time");
             
             //wait for the Serial Reader to update the string buffer
             Thread.sleep(SLEEP_TIME_FOR_READER + 3000);
@@ -650,10 +651,39 @@ public class DataCollector extends Thread{
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             if(isOn)
             {
-                this.writeToEventLog("[Event]: Send command to BMS with index"+index+"to turn bypass on");
+                this.writeToEventLog("[Event]: Send command to BMS with index "+index+" to turn bypass on");
             }else
             {
-                this.writeToEventLog("[Event]: Send command to BMS with index"+index+"to turn bypass off");
+                this.writeToEventLog("[Event]: Send command to BMS with index "+index+" to turn bypass off");
+            }
+        }catch(Exception e)
+        {
+            this.writeToEventLog("[Error]: Exceptions occurred when trying to set bypass switch.");
+            System.out.println(e);
+        }
+    }
+    
+    public void setBypassTime()
+    {
+        //The command used to set bypass switch
+        byte[] bytesToWrite = {'0','0','0','2','0','0','0','0'};
+        
+        //update the bytes with the bypass time        
+        bytesToWrite[4] = (byte)((this.chargingParameters.getBypassDuration() & 0x0000F000) >> 12);
+        bytesToWrite[5] = (byte)((this.chargingParameters.getBypassDuration() & 0x00000F00) >> 8);
+        bytesToWrite[6] = (byte)((this.chargingParameters.getBypassDuration() & 0x000000F0) >> 4);
+        bytesToWrite[7] = (byte)((this.chargingParameters.getBypassDuration() & 0x0000000F));
+
+        
+        //writing the bytes to BMS board to set the bypass switch
+        try{
+            for(int i = 1; i <= this.chargingParameters.getNumOfCells(); i++)
+            {
+                bytesToWrite[0] = '0';
+                bytesToWrite[1] = '0';
+                bytesToWrite = this.updateBytesBasedOnIndex(bytesToWrite, i);
+                this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
+                this.writeToEventLog("[Event]: Send command to BMS with index "+i+" to set bypass time");
             }
         }catch(Exception e)
         {
@@ -680,7 +710,7 @@ public class DataCollector extends Thread{
             //write the bytes to BMS board
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             
-            this.writeToEventLog("[Event]: Send command to BMS with index"+index+"to get bypass state");
+            this.writeToEventLog("[Event]: Send command to BMS with index "+index+" to get bypass state");
             
             //allow the SerialReader to update the string buffer
             Thread.sleep(SLEEP_TIME_FOR_READER);
@@ -852,7 +882,7 @@ public class DataCollector extends Thread{
             //write the BMS board with the test command
             this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
             
-            this.writeToEventLog("[Event]: Send command to Cell with index"+index+"to verify if the cell is still there");
+            this.writeToEventLog("[Event]: Send command to Cell with index "+index+" to verify if the cell is still there");
             
             //allow the Serial Reader to write to the string buffer
             Thread.sleep(SLEEP_TIME_FOR_READER);
@@ -967,11 +997,20 @@ public class DataCollector extends Thread{
                     while(true)
                     {
                         System.out.println("The bypass cutoff is: " + this.chargingParameters.getBypassCutoff());
+                        
+                        if(this.requestToSetBypassTime)
+                        {
+                            this.setBypassTime();
+                            this.requestToSetBypassTime = false;
+                        }
+                        
+                        System.out.println("Before turning off all bypass");
                         if(this.requestToTurnOffAllBypass)
                         {
                             this.turnOffAllBypass();
                             this.requestToTurnOffAllBypass = false;
                         }
+                        System.out.println("after turning off all bypass");
                         
                         for(int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
                         {
@@ -1070,6 +1109,11 @@ public class DataCollector extends Thread{
                                     this.writeToDatabase("\t\t\t<BypassTime>"+bypassTime+"<\\BypassTime>");
                                 }else if(bypassState == 0)
                                 {
+                                    if(this.realTimeData.getBypassInfo(i-1))
+                                    {
+                                        MainController.mostRecentBypassInfo[i-1] = false;
+                                        System.out.println("most recent bypass info updated to false for index " + (i-1));
+                                    }
                                     this.realTimeData.setBypassInfo(i-1, false);
                                     this.writeToDatabase("\t\t\t<Bypassed>false<\\Bypassed>");
                                     this.writeToDatabase("\t\t\t<BypassTime>0<\\BypassTime>");
@@ -1084,7 +1128,7 @@ public class DataCollector extends Thread{
                             }else if(i != 1)
                             {
                                 //update the number of cells
-                                this.chargingParameters.setNumOfCells(i-1);
+                                //this.chargingParameters.setNumOfCells(i-1);
                                 break;
                             }else
                             {

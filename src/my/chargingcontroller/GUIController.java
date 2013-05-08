@@ -273,10 +273,7 @@ public class GUIController extends Thread{
     public void exitAndCleanUp()
     {
         this.mainController.exitAndCleanUp();
-        if(this.chargingMonitor!=null)
-        {
-            this.chargingMonitor.dispose();
-        }
+        
         if(this.parameterSetup != null)
         {
             this.parameterSetup.dispose();
@@ -289,6 +286,20 @@ public class GUIController extends Thread{
         {
             this.popupDialog.dispose();
         }
+        
+        if(this.chargingMonitor!=null)
+        {
+            this.chargingMonitor.setVisible(false);
+            try{
+                Thread.sleep(12000);
+            }catch(Exception e)
+            {
+
+            }
+            this.chargingMonitor.dispose();
+        }
+        
+        System.exit(0);
     }
     
     public void setRealTimeData(RealTimeData _realTimeData)

@@ -1,0 +1,3 @@
+[Error]:COM9 is already in use when trying to look for ports		Wed May 08 14:57:37 EDT 2013
+[Error]:COM10 is already in use when trying to look for ports		Wed May 08 14:57:42 EDT 2013
+[Error]: BMS board not found		Wed May 08 14:57:44 EDT 2013
