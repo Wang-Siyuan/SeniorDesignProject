@@ -31,7 +31,7 @@ public class MainController extends Thread{
         int tUpper = 50;
         int bypassDuration = 20;
         double bypassThreshold = 0.05;
-        double bypassCutoff = vUpper - 0.2;
+        double bypassCutoff = 3.6;
         ArrayList<String> listOfPorts = new ArrayList<String>();
         String portToPC = "";
         String portToArduino = "";
@@ -163,7 +163,7 @@ public class MainController extends Thread{
             this.dataCollector.requestToTurnOnBypass[index-1] = true;
         }else
         {
-            this.dataCollector.requestToTurnOffBypass[index-1] = false;
+            this.dataCollector.requestToTurnOffBypass[index-1] = true;
         }
     }
     
@@ -241,7 +241,7 @@ public class MainController extends Thread{
                     }else
                     {
                         this.realTimeData.setState(RealTimeData.State.CHARGING);
-                        this.dataCollector.setChargingRelay(true);
+                        this.dataCollector.requestToTurnOnRelay = true;
                         this.chargingStartTime = System.currentTimeMillis();
                     }
                 }
@@ -259,11 +259,11 @@ public class MainController extends Thread{
                         //charging was finished
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
-                        this.dataCollector.setChargingRelay(false);
+                        this.dataCollector.requestToTurnOffRelay = true;
                         this.guiController.createdPopupDialog("Message", "Charging is not done, but charging timeout expired!");
                         for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
                         {
-                            this.dataCollector.setBypassSwitch(j, false);
+                            this.dataCollector.requestToTurnOffBypass[j-1] = true;
                         }
                     }
                     else if(this.checkForCellOvercharge())
@@ -272,11 +272,11 @@ public class MainController extends Thread{
                         //charging was finished
                         this.realTimeData.setIsCharging(false);
                         this.realTimeData.setState(RealTimeData.State.IDLE);
-                        this.dataCollector.setChargingRelay(false);
+                        this.dataCollector.requestToTurnOffRelay = true;
                         this.guiController.createdPopupDialog("Message", "Charging is Done!");
                         for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
                         {
-                            this.dataCollector.setBypassSwitch(j, false);
+                            this.dataCollector.requestToTurnOffBypass[j-1] = true;
                         }
                     }else if(this.checkForCellOverheating())
                     {
@@ -284,11 +284,11 @@ public class MainController extends Thread{
                         //charging was stopped
                         this.dataCollector.setChargingRelay(false);
                         this.guiController.createdPopupDialog("Warning", "Charging is stopped because at least one of the cells is overheating.");
-                        this.realTimeData.setIsCharging(false);
+                        this.dataCollector.requestToTurnOffRelay = true;
                         this.realTimeData.setState(RealTimeData.State.IDLE);
                         for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
                         {
-                            this.dataCollector.setBypassSwitch(j, false);
+                            this.dataCollector.requestToTurnOffBypass[j-1] = true;
                         }
                     }else if(this.checkForCurrentOverLimit())
                     {
@@ -296,11 +296,11 @@ public class MainController extends Thread{
                         //charging was stopped
                         this.dataCollector.setChargingRelay(false);
                         this.guiController.createdPopupDialog("Warning", "Charging is stopped because the current is already over the upper limit.");
-                        this.realTimeData.setIsCharging(false);
+                        this.dataCollector.requestToTurnOffRelay = true;
                         this.realTimeData.setState(RealTimeData.State.IDLE);
                         for(int j = 1; j <= this.chargingParameters.getNumOfCells(); j++)
                         {
-                            this.dataCollector.setBypassSwitch(j, false);
+                            this.dataCollector.requestToTurnOffBypass[j-1] = true;
                         }
                     }else
                     {
@@ -310,7 +310,7 @@ public class MainController extends Thread{
                             boolean result = this.checkForBypass(i);
                             if( result && !this.realTimeData.getBypassInfo(i) & !cellBypassCommandSent[i])
                             {
-                                this.dataCollector.setBypassSwitch(i+1, true);
+                                this.dataCollector.requestToTurnOnBypass[i] = true;
                                 cellBypassCommandSent[i] = true;
                             }else if(this.realTimeData.getBypassInfo(i))
                             {
@@ -322,7 +322,7 @@ public class MainController extends Thread{
             }
             if(prev)
             {
-                this.dataCollector.setChargingRelay(false);
+                this.dataCollector.requestToTurnOffRelay = true;
                 prev = false;
             }
             this.realTimeData.setState(RealTimeData.State.IDLE);
@@ -337,7 +337,7 @@ public class MainController extends Thread{
     
     public void exitAndCleanUp()
     {
-        this.dataCollector.turnOffAllBypass();
+        this.dataCollector.requestToTurnOffAllBypass = true;
         System.exit(0);
     }
     
@@ -377,6 +377,11 @@ public class MainController extends Thread{
             if((index != i) && (this.realTimeData.getDiff(index, i) > this.chargingParameters.getBypassThreshold()) &&
                (this.realTimeData.getVoltage(index) < this.chargingParameters.getBypassCutoff()))
             {
+                if(index == 3)
+                {
+                    System.out.println("Diff between 3 and "+i+" is "+this.realTimeData.getDiff(index,i));
+                }
+                
                 bypassNeeded = true;
             }else if (this.realTimeData.getDiff(index, i) < this.chargingParameters.getBypassThreshold())
             {

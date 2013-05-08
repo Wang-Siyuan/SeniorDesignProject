@@ -33,7 +33,7 @@ public class AdvancedConfig extends javax.swing.JDialog {
         this.jTextField5.setText(""+this.chargingParameters.getTemperatureOffset(1));
         this.jTextField6.setText(""+this.chargingParameters.getTemperatureOffset(2));
         this.jTextField7.setText(""+this.chargingParameters.getCurrentOffset());
-        this.jTextField8.setText(""+this.chargingParameters.getBypassCutoff());
+        this.jTextField8.setText(""+Math.floor(this.chargingParameters.getBypassCutoff() * 100)/100);
     }
     
     /**

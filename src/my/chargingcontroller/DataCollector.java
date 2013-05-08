@@ -79,6 +79,8 @@ public class DataCollector extends Thread{
     public boolean requestToTurnOffAllBypass = false;
     public boolean[] requestToTurnOffBypass = null;
     public boolean[] requestToTurnOnBypass = null;
+    public boolean requestToTurnOnRelay = false;
+    public boolean requestToTurnOffRelay = true;
             
     public DataCollector(MainController _mainController, RealTimeData _realTimeData, ChargingParameters _chargingParameters)
     {
@@ -512,11 +514,17 @@ public class DataCollector extends Thread{
             {
                 System.out.println("Pack Current is: "+ this.stringBuffer);
                 //conversion equation
+                
+                if(!this.stringBuffer.equals(""))
+                {
                 v_ic = Integer.parseInt(this.stringBuffer, 16);
                 actual_current = ((v_ref/gain)*(v_ic/(Math.pow(2,10) - 1)) + v_off)/resistance_bar;
                 int temp_result = (int)(actual_current*100);
                 actual_current = ((double)(temp_result))/100;
-                                
+                }else
+                {
+                    actual_current = 0;
+                }
                 //reset the buffer
                 this.stringBuffer = "";
                 return actual_current;
@@ -579,8 +587,14 @@ public class DataCollector extends Thread{
 
                 sec = this.stringBuffer.substring(4, 8);
                 time_sec = Long.parseLong(sec, 16);
-
-                millisec = this.stringBuffer.substring(8, 12);
+                
+                if(this.stringBuffer.length() == 11)
+                {
+                    millisec = this.stringBuffer.substring(8,11);
+                }else
+                {
+                    millisec = this.stringBuffer.substring(8, 12);
+                }
                 time_millisec = Long.parseLong(millisec, 16);
 
                 timeToReturn = (time_min << 32) + (time_sec << 16) + time_millisec;
@@ -952,6 +966,7 @@ public class DataCollector extends Thread{
                     //This will continuously run until the program exits
                     while(true)
                     {
+                        System.out.println("The bypass cutoff is: " + this.chargingParameters.getBypassCutoff());
                         if(this.requestToTurnOffAllBypass)
                         {
                             this.turnOffAllBypass();
@@ -970,6 +985,17 @@ public class DataCollector extends Thread{
                                 this.setBypassSwitch(i+1, true);
                                 this.requestToTurnOnBypass[i] = false;
                             }
+                        }
+                        
+                        if(this.requestToTurnOnRelay)
+                        {
+                            this.setChargingRelay(true);
+                            this.requestToTurnOnRelay = false;
+                        }
+                        if(this.requestToTurnOffRelay)
+                        {
+                            this.setChargingRelay(false);
+                            this.requestToTurnOffRelay = false;
                         }
                         
                         //always work off the RealTimeData and ChargingParameters that the MainController has
