@@ -1136,6 +1136,13 @@ public class DataCollector extends Thread{
                                 this.realTimeData.setErrorOccurred(true);
                                 this.realTimeData.setErrorMessage(this.realTimeData.getErrorMessage()+"No Cell Detected.  Please check if one of the cells have address 0x02\n");
                                 errorOccurred = true;
+
+                                if(this.realTimeData.getIsCharging())
+                                {
+                                    this.realTimeData.setIsCharging(false);
+                                    this.turnOffAllBypass();
+                                    this.setChargingRelay(false);
+                                }
                             }
                             this.writeToDatabase("\t\t<\\Cell>");
                         }
