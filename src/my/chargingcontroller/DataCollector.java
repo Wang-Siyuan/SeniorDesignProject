@@ -663,16 +663,34 @@ public class DataCollector extends Thread{
         }
     }
     
+    public byte getASCII(byte old)
+    {
+        byte byteToReturn = '0';
+        
+        if(old <= 0x09)
+        {
+            byteToReturn += old;
+        }else{
+            byteToReturn = 'a';
+            byteToReturn += (old-10);
+        }
+        old = byteToReturn;
+        return byteToReturn;
+    }
+    
     public void setBypassTime()
     {
         //The command used to set bypass switch
         byte[] bytesToWrite = {'0','0','0','2','0','0','0','0'};
         
-        //update the bytes with the bypass time        
-        bytesToWrite[4] = (byte)((this.chargingParameters.getBypassDuration() & 0x0000F000) >> 12);
-        bytesToWrite[5] = (byte)((this.chargingParameters.getBypassDuration() & 0x00000F00) >> 8);
-        bytesToWrite[6] = (byte)((this.chargingParameters.getBypassDuration() & 0x000000F0) >> 4);
-        bytesToWrite[7] = (byte)((this.chargingParameters.getBypassDuration() & 0x0000000F));
+        //update the bytes with the bypass time
+ 
+        
+        
+        bytesToWrite[4] = this.getASCII((byte)((this.chargingParameters.getBypassDuration() & 0x0000F000) >> 12));
+        bytesToWrite[5] = this.getASCII((byte)((this.chargingParameters.getBypassDuration() & 0x00000F00) >> 8));
+        bytesToWrite[6] = this.getASCII((byte)((this.chargingParameters.getBypassDuration() & 0x000000F0) >> 4));
+        bytesToWrite[7] = this.getASCII((byte)((this.chargingParameters.getBypassDuration() & 0x0000000F)));
 
         
         //writing the bytes to BMS board to set the bypass switch
@@ -683,6 +701,7 @@ public class DataCollector extends Thread{
                 bytesToWrite[1] = '0';
                 bytesToWrite = this.updateBytesBasedOnIndex(bytesToWrite, i);
                 this.sw[this.writerIndexForBMS].writeToSerial(bytesToWrite);
+                Thread.sleep(500);
                 this.writeToEventLog("[Event]: Send command to BMS with index "+i+" to set bypass time");
             }
         }catch(Exception e)
