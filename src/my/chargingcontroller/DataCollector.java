@@ -1023,13 +1023,11 @@ public class DataCollector extends Thread{
                             this.requestToSetBypassTime = false;
                         }
                         
-                        System.out.println("Before turning off all bypass");
                         if(this.requestToTurnOffAllBypass)
                         {
                             this.turnOffAllBypass();
                             this.requestToTurnOffAllBypass = false;
                         }
-                        System.out.println("after turning off all bypass");
                         
                         for(int i = 0; i < this.chargingParameters.getNumOfCells(); i++)
                         {
