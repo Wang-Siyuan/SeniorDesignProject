@@ -1145,7 +1145,7 @@ public class DataCollector extends Thread{
                             }else if(i != 1)
                             {
                                 //update the number of cells
-                                //this.chargingParameters.setNumOfCells(i-1);
+                                this.chargingParameters.setNumOfCells(i-1);
                                 break;
                             }else
                             {

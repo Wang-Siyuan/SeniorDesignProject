@@ -33,12 +33,12 @@ public class MainController extends Thread{
         
         /* generate a set of default charging parameters */
         int numOfCells = 3;
-        double vUpper = 3.8;
+        double vUpper = 3.6;
         double iUpper = 1000;
         int tUpper = 50;
         int bypassDuration = 20;
-        double bypassThreshold = 0.06;
-        double bypassCutoff = 3.6;
+        double bypassThreshold = 0.05;
+        double bypassCutoff = 3.5;
         ArrayList<String> listOfPorts = new ArrayList<String>();
         String portToPC = "";
         String portToArduino = "";
@@ -48,7 +48,7 @@ public class MainController extends Thread{
         voltageOffsets[1] = (float)(-0.01);
         voltageOffsets[2] = (float)(0.028);
         float[] temperatureOffsets = new float[8];
-        float currentOffset = (float)(-0.0010);
+        float currentOffset = (float)(-0.0062);
         
         defaultChargingParameters = new ChargingParameters(     numOfCells, 
                                                                 vUpper,

@@ -167,9 +167,7 @@ public class ChargingMonitor extends javax.swing.JFrame{
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Charging Monitor");
-        setMaximumSize(new java.awt.Dimension(1600, 1000));
         setMinimumSize(new java.awt.Dimension(900, 800));
-        setPreferredSize(new java.awt.Dimension(900, 800));
 
         jButton1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         jButton1.setText("Start Charging");
